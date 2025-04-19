@@ -158,7 +158,8 @@ def relatorio_csv():
 
     return send_file(caminho_arquivo, as_attachment=True)
 
-# Inicia o servidor
+# Inicia o servidor (Render fix)
 if __name__ == '__main__':
-    print("Iniciando servidor Flask...")
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    print(f"Iniciando servidor Flask na porta {port}...")
+    app.run(debug=False, host='0.0.0.0', port=port)
