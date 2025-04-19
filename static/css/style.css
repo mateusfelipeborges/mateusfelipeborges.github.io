@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Madra Mada</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <img src="img/sigilo.svg" alt="Símbolo" class="sigilo">
+  <h1>Madra Mada ✨</h1>
+  <p>Um espaço para reflexão, criação, orientação e expansão pessoal.</p>
+  <p class="frase">Que o véu da intuição toque aqueles que buscam compreender mais do que apenas o visível.</p>
+
+  <nav>
+    <a href="manifesto.html">Manifesto</a>
+    <a href="altares.html">Espaços</a>
+    <a href="textos.html">Palavras</a>
+    <a href="oracoes.html">Silêncios</a>
+    <a href="maddie.html">Consultoria</a>
+    <a href="eassimchoveu.html">O Livro</a>
+  </nav>
+
+  <section class="video">
+    <h2>Última transmissão</h2>
+    <p>Um conteúdo recente para te inspirar e provocar novos olhares.</p>
+    <div class="video-container">
+      <iframe src="https://www.youtube.com/embed/BpwrwoHo7nU" 
+              frameborder="0" allowfullscreen>
+      </iframe>
+    </div>
+  </section>
+
+  <img src="img/capaeassimchoveu.jpg" alt="Capa do Livro E Assim, Choveu" class="capa">
+
+  <a href="https://a.co/d/36A5bPh" class="botao-compra" target="_blank" rel="noopener noreferrer">Adquirir o livro</a>
+</body>
+</html>

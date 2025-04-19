@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Madra Mada</title>
+  <style>
+    body {
+      background: #2e1e3f;
+      color: #f0e6ff;
+      font-family: 'Georgia', serif;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    h1 {
+      font-size: 3.5em;
+      margin-top: 1em;
+      margin-bottom: 0.2em;
+      letter-spacing: 2px;
+      text-shadow: 0 0 5px #bb9af7;
+    }
+
+    p {
+      font-size: 1.2em;
+      opacity: 0.85;
+      max-width: 600px;
+      line-height: 1.6;
+      padding: 0 1em;
+    }
+
+    .sigilo {
+      width: 120px;
+      margin-top: 2em;
+      margin-bottom: 20px;
+      filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.2));
+    }
+
+    .frase {
+      font-style: italic;
+      margin-top: 1em;
+      opacity: 0.7;
+    }
+
+    nav {
+      margin-top: 2em;
+    }
+
+    nav a {
+      margin: 0 15px;
+      text-decoration: none;
+      color: #f0e6ff;
+      font-weight: bold;
+      transition: color 0.3s;
+    }
+
+    nav a:hover {
+      color: #caa9ff;
+    }
+
+    section.video {
+      margin-top: 6em;
+      padding: 2em 1em;
+      width: 100%;
+      max-width: 900px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .video h2 {
+      font-size: 2em;
+      margin-bottom: 0.5em;
+      color: #e0caff;
+    }
+
+    .video p {
+      opacity: 0.9;
+      font-size: 1.1em;
+      max-width: 700px;
+    }
+
+    .video-container {
+      position: relative;
+      padding-bottom: 56.25%;
+      height: 0;
+      width: 100%;
+      max-width: 720px;
+      overflow: hidden;
+      margin-top: 2em;
+      box-shadow: 0 0 20px rgba(255,255,255,0.1);
+      border-radius: 10px;
+    }
+
+    .video-container iframe {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+      border-radius: 10px;
+    }
+
+    .botao-compra {
+      display: inline-block;
+      margin-top: 3em;
+      background: #bb9af7;
+      color: #2e1e3f;
+      padding: 0.8em 2em;
+      font-weight: bold;
+      border: none;
+      border-radius: 6px;
+      text-decoration: none;
+      font-size: 1em;
+      transition: background 0.3s;
+    }
+
+    .botao-compra:hover {
+      background: #d4baff;
+    }
+  </style>
+</head>
+<body>
+  <img src="img/sigilo.svg" alt="Símbolo" class="sigilo">
+  <h1>Madra Mada ✨</h1>
+  <p>Um espaço para reflexão, criação, orientação e expansão pessoal.</p>
+  <p class="frase">Que o véu da intuição toque aqueles que buscam compreender mais do que apenas o visível.</p>
+
+  <nav>
+    <a href="manifesto.html">Manifesto</a>
+    <a href="altares.html">Espaços</a>
+    <a href="textos.html">Palavras</a>
+    <a href="oracoes.html">Silêncios</a>
+    <a href="maddie.html">Consultoria</a>
+    <a href="eassimchoveu.html">O Livro</a>
+    <a href="/oraculo">Oráculo</a>
+
+  </nav>
+
+  <section class="video">
+    <h2>Última transmissão</h2>
+    <p>Um conteúdo recente para te inspirar e provocar novos olhares.</p>
+    <div class="video-container">
+      <iframe src="https://www.youtube.com/embed/BpwrwoHo7nU" 
+              frameborder="0" allowfullscreen>
+      </iframe>
+    </div>
+  </section>
+
+  <a href="https://a.co/d/36A5bPh" class="botao-compra" target="_blank" rel="noopener noreferrer">Adquirir o livro</a>
+</body>
+</html>

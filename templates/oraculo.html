@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Oráculo Madra Mada</title>
+</head>
+<body>
+  <h1>🔮 Oráculo Madra Mada</h1>
+  <form method="POST">
+    <label for="pergunta">Envie sua pergunta:</label><br>
+    <input type="text" name="pergunta" required>
+    <button type="submit">Consultar</button>
+  </form>
+
+  {% if resposta %}
+    <h2>Resposta do Oráculo:</h2>
+    <p>{{ resposta }}</p>
+  {% endif %}
+</body>
+</html>
