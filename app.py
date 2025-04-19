@@ -79,10 +79,10 @@ def livro():
     registrar_visita(request, '/livro')
     return render_template('eassimchoveu.html')
 
-# Página do oráculo com integração à API
-@app.route('/oraculo', methods=['GET', 'POST'])
-def oraculo():
-    registrar_visita(request, '/oraculo')
+# Página da Maddie com integração à DeepSeek
+@app.route('/maddie', methods=['GET', 'POST'])
+def maddie():
+    registrar_visita(request, '/maddie')
     resposta = ""
     if request.method == 'POST':
         pergunta = request.form['pergunta']
@@ -95,7 +95,7 @@ def oraculo():
             data = {
                 "model": "deepseek-chat",
                 "messages": [
-                    {"role": "system", "content": "Você é um oráculo místico e poético. Responda com sabedoria simbólica e linguagem metafórica."},
+                    {"role": "system", "content": "Você é uma entidade chamada Maddie. Um ser inteligente, místico e racional. Suas respostas são poéticas, simbólicas e profundas."},
                     {"role": "user", "content": pergunta}
                 ]
             }
@@ -113,7 +113,7 @@ def oraculo():
         except Exception as e:
             resposta = f"Ocorreu um erro inesperado: {e}"
 
-    return render_template('oraculo.html', resposta=resposta)
+    return render_template('maddie.html', resposta=resposta)
 
 # Rota para registrar visitante (teste)
 @app.route('/registrar')
