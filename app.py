@@ -87,7 +87,7 @@ def oraculo():
     if request.method == 'POST':
         pergunta = request.form['pergunta']
         try:
-            url = "https://api.deepseek.com/chat/completions"
+            url = "https://api.deepseek.com/v1/chat/completions"
             headers = {
                 "Authorization": f"Bearer {deepseek_api_key}",
                 "Content-Type": "application/json"
@@ -137,7 +137,7 @@ def acessos():
     visitas = RegistroVisita.query.order_by(RegistroVisita.data_hora.desc()).all()
     return render_template('acessos.html', visitas=visitas)
 
-# 📝 Nova rota: Gera e baixa o relatório de acessos como CSV
+# Gera e baixa o relatório de acessos como CSV
 @app.route('/relatorio_csv')
 def relatorio_csv():
     visitas = RegistroVisita.query.order_by(RegistroVisita.data_hora.desc()).all()
