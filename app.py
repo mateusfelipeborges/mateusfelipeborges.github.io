@@ -1,5 +1,7 @@
 from flask import Flask, render_template, request
 from dotenv import load_dotenv
+from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime
 import os
 import requests
 
@@ -10,21 +12,80 @@ deepseek_api_key = os.getenv("DEEPSEEK_API_KEY")
 # Flask App
 app = Flask(__name__, static_folder='static', template_folder='templates')
 
+# Configuração do Banco de Dados SQLite
+basedir = os.path.abspath(os.path.dirname(__file__))
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'madra.db')
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# Inicializa o banco de dados
+db = SQLAlchemy(app)
+
+# Modelo Visitante
+class Visitante(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    nome = db.Column(db.String(100))
+    mensagem = db.Column(db.String(200))
+
+# Modelo Registro de Visita
+class RegistroVisita(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    ip = db.Column(db.String(100))
+    user_agent = db.Column(db.String(300))
+    cidade = db.Column(db.String(100))
+    pais = db.Column(db.String(100))
+    data_hora = db.Column(db.DateTime, default=datetime.utcnow)
+    rota = db.Column(db.String(100))
+
+# Função para registrar visita
+def registrar_visita(request, rota):
+    ip = request.remote_addr
+    user_agent = request.headers.get('User-Agent')
+    cidade = "Desconhecida"
+    pais = "Desconhecido"
+    try:
+        response = requests.get(f"https://ipapi.co/{ip}/json/")
+        if response.status_code == 200:
+            dados = response.json()
+            cidade = dados.get("city", "Desconhecida")
+            pais = dados.get("country_name", "Desconhecido")
+    except:
+        pass
+    nova_visita = RegistroVisita(
+        ip=ip,
+        user_agent=user_agent,
+        cidade=cidade,
+        pais=pais,
+        rota=rota
+    )
+    db.session.add(nova_visita)
+    db.session.commit()
+
+# ROTA MANUAL PARA CRIAR O BANCO
+@app.route('/criar_banco')
+def criar_banco():
+    db.create_all()
+    return "Banco de dados criado com sucesso!"
+
+# Página inicial
 @app.route('/')
 def home():
-    return render_template('index.html')  # Aqui estamos usando o arquivo index.html em templates
+    registrar_visita(request, '/')
+    return render_template('index.html')
 
+# Página do livro
 @app.route('/livro')
 def livro():
-    return render_template('eassimchoveu.html')  # Página adicional
+    registrar_visita(request, '/livro')
+    return render_template('eassimchoveu.html')
 
+# Página do oráculo com integração à API
 @app.route('/oraculo', methods=['GET', 'POST'])
 def oraculo():
+    registrar_visita(request, '/oraculo')
     resposta = ""
     if request.method == 'POST':
         pergunta = request.form['pergunta']
         try:
-            # Requisição à API da DeepSeek
             url = "https://api.deepseek.com/chat/completions"
             headers = {
                 "Authorization": f"Bearer {deepseek_api_key}",
@@ -49,11 +110,33 @@ def oraculo():
         except requests.exceptions.RequestException as e:
             resposta = f"Erro de requisição: {e}"
         except Exception as e:
-            resposta = f"Ocorreu um erro inesperado: {e}"
+            resposta = f"Ocorreu um erro inesperado: {e}"  # <- LINHA CORRIGIDA
 
-    return render_template('oraculo.html', resposta=resposta)  # Página oráculo
+    return render_template('oraculo.html', resposta=resposta)
 
-# 🧪 Inicia o servidor localmente
+# Rota para registrar visitante (teste)
+@app.route('/registrar')
+def registrar():
+    registrar_visita(request, '/registrar')
+    novo = Visitante(nome="Mateus", mensagem="Salve, Madalina!")
+    db.session.add(novo)
+    db.session.commit()
+    return "Visitante registrado!"
+
+# Rota para listar visitantes com HTML estilizado
+@app.route('/visitantes')
+def visitantes():
+    registrar_visita(request, '/visitantes')
+    todos = Visitante.query.all()
+    return render_template('visitantes.html', visitantes=todos)
+
+# Rota para listar acessos registrados
+@app.route('/acessos')
+def acessos():
+    visitas = RegistroVisita.query.order_by(RegistroVisita.data_hora.desc()).all()
+    return render_template('acessos.html', visitas=visitas)
+
+# Inicia o servidor
 if __name__ == '__main__':
     print("Iniciando servidor Flask...")
     app.run(debug=True)

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Registros de Acesso</title>
+    <style>
+        body {
+            background-color: #111;
+            color: #eee;
+            font-family: monospace;
+            padding: 40px;
+        }
+        .registro {
+            border-bottom: 1px solid #444;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>📜 Registros de Acesso</h1>
+    {% for visita in visitas %}
+        <div class="registro">
+            <strong>{{ visita.data_hora.strftime('%d/%m/%Y %H:%M:%S') }}</strong><br>
+            IP: {{ visita.ip }}<br>
+            Local: {{ visita.cidade }}, {{ visita.pais }}<br>
+            Página: {{ visita.rota }}<br>
+            Dispositivo: {{ visita.user_agent }}
+        </div>
+    {% endfor %}
+</body>
+</html>
+
