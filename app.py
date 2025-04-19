@@ -38,11 +38,19 @@ def oraculo():
                 ]
             }
             response = requests.post(url, headers=headers, json=data)
-            result = response.json()
-            
-            resposta = result['choices'][0]['message']['content']
+            if response.status_code == 200:
+                result = response.json()
+                if 'choices' in result and len(result['choices']) > 0:
+                    resposta = result['choices'][0]['message']['content']
+                else:
+                    resposta = "Desculpe, não consegui entender a sua pergunta."
+            else:
+                resposta = "Erro ao acessar a API, tente novamente mais tarde."
+        except requests.exceptions.RequestException as e:
+            resposta = f"Erro de requisição: {e}"
         except Exception as e:
-            resposta = f"Ocorreu um erro: {e}"
+            resposta = f"Ocorreu um erro inesperado: {e}"
+
     return render_template('oraculo.html', resposta=resposta)  # Página oráculo
 
 # 🧪 Inicia o servidor localmente
