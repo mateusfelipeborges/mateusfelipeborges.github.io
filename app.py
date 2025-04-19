@@ -1,9 +1,10 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, send_file
 from dotenv import load_dotenv
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import os
 import requests
+import csv
 
 # Carrega variáveis do .env
 load_dotenv()
@@ -110,7 +111,7 @@ def oraculo():
         except requests.exceptions.RequestException as e:
             resposta = f"Erro de requisição: {e}"
         except Exception as e:
-            resposta = f"Ocorreu um erro inesperado: {e}"  # <- LINHA CORRIGIDA
+            resposta = f"Ocorreu um erro inesperado: {e}"
 
     return render_template('oraculo.html', resposta=resposta)
 
@@ -135,6 +136,27 @@ def visitantes():
 def acessos():
     visitas = RegistroVisita.query.order_by(RegistroVisita.data_hora.desc()).all()
     return render_template('acessos.html', visitas=visitas)
+
+# 📝 Nova rota: Gera e baixa o relatório de acessos como CSV
+@app.route('/relatorio_csv')
+def relatorio_csv():
+    visitas = RegistroVisita.query.order_by(RegistroVisita.data_hora.desc()).all()
+    caminho_arquivo = os.path.join(basedir, 'relatorio_acessos.csv')
+
+    with open(caminho_arquivo, mode='w', newline='', encoding='utf-8') as arquivo_csv:
+        writer = csv.writer(arquivo_csv)
+        writer.writerow(['Data/Hora', 'IP', 'Cidade', 'País', 'Rota', 'User-Agent'])
+        for v in visitas:
+            writer.writerow([
+                v.data_hora.strftime('%d/%m/%Y %H:%M:%S'),
+                v.ip,
+                v.cidade,
+                v.pais,
+                v.rota,
+                v.user_agent
+            ])
+
+    return send_file(caminho_arquivo, as_attachment=True)
 
 # Inicia o servidor
 if __name__ == '__main__':
