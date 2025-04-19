@@ -12,11 +12,11 @@ app = Flask(__name__, static_folder='static', template_folder='templates')
 
 @app.route('/')
 def home():
-    return render_template('index.html')
+    return render_template('index.html')  # Aqui estamos usando o arquivo index.html em templates
 
 @app.route('/livro')
 def livro():
-    return render_template('eassimchoveu.html')
+    return render_template('eassimchoveu.html')  # Página adicional
 
 @app.route('/oraculo', methods=['GET', 'POST'])
 def oraculo():
@@ -43,16 +43,9 @@ def oraculo():
             resposta = result['choices'][0]['message']['content']
         except Exception as e:
             resposta = f"Ocorreu um erro: {e}"
-    return render_template('oraculo.html', resposta=resposta)
+    return render_template('oraculo.html', resposta=resposta)  # Página oráculo
 
 # 🧪 Inicia o servidor localmente
 if __name__ == '__main__':
     print("Iniciando servidor Flask...")
     app.run(debug=True)
-
-
-
-
-
-
-
