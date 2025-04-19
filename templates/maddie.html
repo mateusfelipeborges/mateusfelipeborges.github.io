@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Maddie</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #1b1b2b, #2a2a3f);
+      color: #f2f2f2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    h1 {
+      font-size: 2.8rem;
+      margin-bottom: 1rem;
+      color: #cba8ff;
+      font-weight: 600;
+    }
+
+    form {
+      background-color: #24243a;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+      max-width: 500px;
+      width: 100%;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.6rem;
+      font-weight: bold;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 0.8rem;
+      border: none;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      background-color: #1c1c2e;
+      color: #f0f0f0;
+    }
+
+    button {
+      background-color: #925eff;
+      border: none;
+      color: white;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #7a4ae6;
+    }
+
+    h2 {
+      margin-top: 2rem;
+      color: #ffd8ff;
+    }
+
+    p {
+      background-color: #1c1c2e;
+      padding: 1rem;
+      border-radius: 10px;
+      max-width: 700px;
+      margin-top: 1rem;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <h1>Maddie</h1>
+  <form method="POST">
+    <label for="pergunta">Envie sua pergunta:</label>
+    <input type="text" name="pergunta" required placeholder="Digite aqui...">
+    <button type="submit">Consultar</button>
+  </form>
+
+  {% if resposta %}
+    <h2>Resposta da Maddie:</h2>
+    <p>{{ resposta }}</p>
+  {% endif %}
+</body>
+</html>
