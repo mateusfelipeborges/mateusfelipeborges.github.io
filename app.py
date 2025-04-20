@@ -26,6 +26,8 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 db = SQLAlchemy(app)
 socketio = SocketIO(app)
 
+# Modelos do banco mantidos como estão
+
 class Visitante(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nome = db.Column(db.String(100))
@@ -115,7 +117,7 @@ def home():
     registrar_visita(request, '/')
     return render_template('index.html')
 
-# (Demais rotas mantidas como no seu último código)
+# (Demais rotas mantidas como no seu último código, não exibidas por brevidade)
 
 if __name__ == '__main__':
-    socketio.run(app, debug=True, host='0.0.0.0', port=int(os.environ.get("PORT", 5000)))
+    socketio.run(app, debug=True, host='0.0.0.0', port=int(os.environ.get("PORT", 5000)), allow_unsafe_werkzeug=True)
