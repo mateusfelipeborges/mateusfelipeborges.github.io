@@ -1,10 +1,11 @@
-from flask import Flask, render_template, request, redirect, url_for, send_file
+from flask import Flask, render_template, request, redirect, url_for, send_file, session
 from dotenv import load_dotenv
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import os
 import requests
 import csv
+from werkzeug.security import generate_password_hash, check_password_hash
 
 # 🌿 Integrações internas
 from maddie_core import gerar_resposta_local, buscar_termo_em_livro
@@ -15,12 +16,12 @@ from maddie_core import gerar_resposta_local, buscar_termo_em_livro
 
 load_dotenv()
 app = Flask(__name__, static_folder='static', template_folder='templates')
+app.secret_key = os.getenv('SECRET_KEY', 'madra_secreta')
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'madra.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Diretório para uploads
 UPLOAD_FOLDER = os.path.join('static', 'uploads')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -52,13 +53,23 @@ class InteracaoMaddie(db.Model):
     resposta = db.Column(db.Text)
     data_hora = db.Column(db.DateTime, default=datetime.utcnow)
 
-# 🔮 Blog — suporte a imagens
 class Postagem(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     titulo = db.Column(db.String(200))
     conteudo = db.Column(db.Text)
     imagem = db.Column(db.String(300))
     data_publicacao = db.Column(db.DateTime, default=datetime.utcnow)
+
+class Usuario(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    nome_completo = db.Column(db.String(150), nullable=False)
+    idade = db.Column(db.Integer)
+    apelido = db.Column(db.String(100))
+    pronomes = db.Column(db.String(50))
+    nome_artistico = db.Column(db.String(150))
+    email = db.Column(db.String(150), unique=True, nullable=False)
+    senha = db.Column(db.String(100), nullable=False)
+    data_registro = db.Column(db.DateTime, default=datetime.utcnow)
 
 # ===============================
 # 🛠 FUNÇÕES AUXILIARES
@@ -144,6 +155,10 @@ def blog():
 @app.route('/escrever', methods=['GET', 'POST'])
 def escrever():
     registrar_visita(request, '/escrever')
+
+    if 'usuario_id' not in session:
+        return redirect(url_for('login'))
+
     if request.method == 'POST':
         titulo = request.form.get('titulo', '').strip()
         conteudo = request.form.get('conteudo', '').strip()
@@ -160,7 +175,57 @@ def escrever():
             db.session.add(nova_postagem)
             db.session.commit()
             return redirect(url_for('blog'))
+
     return render_template('escrever.html')
+
+@app.route('/cadastro', methods=['GET', 'POST'])
+def cadastro():
+    if request.method == 'POST':
+        nome_completo = request.form.get('nome_completo', '').strip()
+        idade = request.form.get('idade', '').strip()
+        apelido = request.form.get('apelido', '').strip()
+        pronomes = request.form.get('pronomes', '').strip()
+        nome_artistico = request.form.get('nome_artistico', '').strip()
+        email = request.form.get('email', '').strip()
+        senha = request.form.get('senha', '').strip()
+
+        if Usuario.query.filter_by(email=email).first():
+            return "⚠️ Email já registrado. Faça login ou use outro email."
+
+        nova_conta = Usuario(
+            nome_completo=nome_completo,
+            idade=int(idade) if idade.isdigit() else None,
+            apelido=apelido,
+            pronomes=pronomes,
+            nome_artistico=nome_artistico,
+            email=email,
+            senha=generate_password_hash(senha)
+        )
+        db.session.add(nova_conta)
+        db.session.commit()
+        return redirect(url_for('login'))
+
+    return render_template('cadastro.html')
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        email = request.form.get('email', '').strip()
+        senha = request.form.get('senha', '').strip()
+
+        usuario = Usuario.query.filter_by(email=email).first()
+        if usuario and check_password_hash(usuario.senha, senha):
+            session['usuario_id'] = usuario.id
+            session['usuario_nome'] = usuario.nome_completo
+            return redirect(url_for('home'))
+        return "❌ Email ou senha inválidos."
+
+    return render_template('login.html')
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('home'))
 
 @app.route('/acessos')
 def acessos():
