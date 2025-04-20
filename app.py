@@ -108,24 +108,27 @@ def registrar_visita(request, rota):
     db.session.add(RegistroVisita(ip=ip, user_agent=user_agent, cidade=cidade, pais=pais, rota=rota))
     db.session.commit()
 
-@app.route('/')
-def home():
-    registrar_visita(request, '/')
-    return render_template('index.html')
+@app.context_processor
+def inject_admin():
+    return dict(admin=session.get('is_admin', False), usuario_nome=session.get('usuario_nome'))
 
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        email = request.form.get('email', '').strip()
-        senha = request.form.get('senha', '').strip()
-        usuario = Usuario.query.filter_by(email=email).first()
-        if usuario and check_password_hash(usuario.senha, senha):
-            session['usuario_id'] = usuario.id
-            session['usuario_nome'] = usuario.nome_completo
-            session['is_admin'] = usuario.admin
-            return redirect(url_for('home'))
-        return render_template('login.html', error='Email ou senha inválidos.')
-    return render_template('login.html')
+@app.route('/criar_admin')
+def criar_admin():
+    if not Usuario.query.filter_by(email="mateusfelipeborges").first():
+        admin = Usuario(
+            nome_completo="Mateus Borges",
+            idade=24,
+            apelido="Mateus",
+            pronomes="ele/dele",
+            nome_artistico="Madra",
+            email="mateusfelipeborges",
+            senha=generate_password_hash("My16182605*"),
+            admin=True
+        )
+        db.session.add(admin)
+        db.session.commit()
+        return "Administrador criado com sucesso!"
+    return "Administrador já existe."
 
 @app.route('/cadastro', methods=['GET', 'POST'])
 def cadastro():
@@ -143,6 +146,59 @@ def cadastro():
         db.session.commit()
         return redirect(url_for('login'))
     return render_template('cadastro.html')
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        email = request.form.get('email', '').strip()
+        senha = request.form.get('senha', '').strip()
+        usuario = Usuario.query.filter_by(email=email).first()
+        if usuario and check_password_hash(usuario.senha, senha):
+            session['usuario_id'] = usuario.id
+            session['usuario_nome'] = usuario.nome_completo
+            session['is_admin'] = usuario.admin
+            return redirect(url_for('home'))
+        return render_template('login.html', error='Email ou senha inválidos.')
+    return render_template('login.html')
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('home'))
+
+@app.route('/')
+def home():
+    registrar_visita(request, '/')
+    return render_template('index.html')
+
+@app.route('/maddie', methods=['GET', 'POST'])
+def maddie():
+    registrar_visita(request, '/maddie')
+    resposta = ""
+    historico = InteracaoMaddie.query.filter_by(ip=request.remote_addr).order_by(
+        InteracaoMaddie.data_hora.desc()).limit(10).all()
+
+    if request.method == 'POST':
+        if 'apagar_historico' in request.form:
+            InteracaoMaddie.query.filter_by(ip=request.remote_addr).delete()
+            db.session.commit()
+            return redirect(url_for('maddie'))
+
+        pergunta = request.form.get('pergunta', '').strip()
+        if pergunta:
+            resposta = gerar_resposta_local(pergunta)
+            nova_interacao = InteracaoMaddie(ip=request.remote_addr, pergunta=pergunta, resposta=resposta)
+            db.session.add(nova_interacao)
+            db.session.commit()
+            historico = InteracaoMaddie.query.filter_by(ip=request.remote_addr).order_by(
+                InteracaoMaddie.data_hora.desc()).limit(10).all()
+
+    return render_template('maddie.html', resposta=resposta, historico=historico)
+
+@app.route('/livros')
+def livros():
+    registrar_visita(request, '/livros')
+    return render_template('livros.html')
 
 @app.route('/blog')
 def blog():
@@ -165,11 +221,6 @@ def escrever():
         db.session.commit()
         return redirect(url_for('blog'))
     return render_template('escrever.html')
-
-@app.route('/livros')
-def livros():
-    registrar_visita(request, '/livros')
-    return render_template('livros.html')
 
 @app.route('/comunidades')
 def comunidades():
@@ -196,29 +247,7 @@ def topico(comunidade_id, topico_id):
             emit('nova_mensagem', {'mensagem': mensagem}, room=topico_id)
     return render_template('topico.html', topico=topico)
 
-@app.route('/maddie', methods=['GET', 'POST'])
-def maddie():
-    registrar_visita(request, '/maddie')
-    resposta = ""
-    historico = InteracaoMaddie.query.filter_by(ip=request.remote_addr).order_by(
-        InteracaoMaddie.data_hora.desc()).limit(10).all()
-
-    if request.method == 'POST':
-        if 'apagar_historico' in request.form:
-            InteracaoMaddie.query.filter_by(ip=request.remote_addr).delete()
-            db.session.commit()
-            return redirect(url_for('maddie'))
-
-        pergunta = request.form.get('pergunta', '').strip()
-        if pergunta:
-            resposta = gerar_resposta_local(pergunta)
-            nova_interacao = InteracaoMaddie(ip=request.remote_addr, pergunta=pergunta, resposta=resposta)
-            db.session.add(nova_interacao)
-            db.session.commit()
-            historico = InteracaoMaddie.query.filter_by(ip=request.remote_addr).order_by(
-                InteracaoMaddie.data_hora.desc()).limit(10).all()
-
-    return render_template('maddie.html', resposta=resposta, historico=historico)
-
 if __name__ == '__main__':
+    with app.app_context():
+        db.create_all()
     socketio.run(app, debug=True, host='0.0.0.0', port=int(os.environ.get("PORT", 5000)), allow_unsafe_werkzeug=True)

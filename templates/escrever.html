@@ -1,79 +1,104 @@
 {% extends "base.html" %}
+
 {% block content %}
 <style>
-  .editor-container {
+  .formulario-postagem {
+    background-color: #241b37;
+    padding: 2rem;
+    border-radius: 12px;
     max-width: 700px;
     margin: 2rem auto;
-    padding: 2rem;
-    background: #1e1b2f;
-    border-radius: 12px;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
-    color: #f0edf5;
+    box-shadow: 0 0 25px rgba(255, 255, 255, 0.05);
+    color: #f0e6ff;
   }
 
-  .editor-container h1 {
-    color: #e0daf6;
-    font-weight: normal;
-    font-size: 1.8rem;
+  .formulario-postagem h2 {
     margin-bottom: 1.5rem;
+    font-size: 1.8rem;
+    color: #e5d6ff;
+    text-align: center;
   }
 
-  form {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  input[type="text"],
-  textarea,
-  input[type="file"] {
-    padding: 0.8rem;
-    font-size: 1rem;
-    border: none;
-    border-radius: 8px;
-    background: #2e2c3f;
-    color: #f0f0f0;
-  }
-
-  textarea {
-    resize: vertical;
-    min-height: 200px;
-  }
-
-  input[type="file"]::file-selector-button {
-    background: #7568b5;
-    color: white;
-    padding: 0.4rem 1rem;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    margin-right: 1rem;
-  }
-
-  button {
-    background-color: #7568b5;
-    color: white;
-    padding: 0.8rem;
-    border: none;
-    border-radius: 8px;
+  .formulario-postagem label {
     font-weight: bold;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
+    color: #d3c2ee;
+    margin-bottom: 0.3rem;
+    display: block;
   }
 
-  button:hover {
-    background-color: #62589d;
+  .formulario-postagem input[type="text"],
+  .formulario-postagem textarea,
+  .formulario-postagem input[type="file"] {
+    width: 100%;
+    padding: 0.8rem;
+    background-color: #2d2544;
+    border: 1px solid #4a3d67;
+    border-radius: 8px;
+    color: #f0e6ff;
+    margin-bottom: 1.2rem;
+    font-size: 1rem;
+  }
+
+  .formulario-postagem textarea {
+    min-height: 200px;
+    resize: vertical;
+  }
+
+  .formulario-postagem button {
+    background-color: #7c62c1;
+    color: #fff;
+    font-weight: bold;
+    border: none;
+    padding: 0.9rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    width: 100%;
+    font-size: 1rem;
+  }
+
+  .formulario-postagem button:hover {
+    background-color: #6b55aa;
+  }
+
+  .formulario-postagem img {
+    max-width: 100%;
+    margin-top: 1rem;
+    display: none;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
   }
 </style>
 
-<div class="editor-container">
-  <h1>✍️ Escrever nova reflexão</h1>
+<div class="formulario-postagem">
+  <h2>📝 Nova Postagem</h2>
   <form method="POST" enctype="multipart/form-data">
-    <input type="text" name="titulo" placeholder="Título da reflexão" required>
-    <textarea name="conteudo" placeholder="Escreva aqui sua mensagem introspectiva..." required></textarea>
-    <input type="file" name="imagem" accept="image/*">
-    <button type="submit">Publicar</button>
+    <label for="titulo">Título:</label>
+    <input type="text" id="titulo" name="titulo" placeholder="Dê um nome à sua reflexão" required>
+
+    <label for="conteudo">Conteúdo:</label>
+    <textarea id="conteudo" name="conteudo" placeholder="Escreva sua inspiração, pensamento ou mensagem..." required></textarea>
+
+    <label for="imagem">Imagem (opcional):</label>
+    <input type="file" id="imagem" name="imagem" accept="image/*">
+    <img id="preview" alt="Pré-visualização da imagem">
+
+    <button type="submit">🌟 Publicar</button>
   </form>
 </div>
+
+<script>
+  document.getElementById("imagem").addEventListener("change", function (event) {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const preview = document.getElementById("preview");
+        preview.src = e.target.result;
+        preview.style.display = "block";
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+</script>
 {% endblock %}
