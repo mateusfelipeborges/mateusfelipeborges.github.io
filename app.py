@@ -150,6 +150,27 @@ def blog():
     posts = Postagem.query.order_by(Postagem.data_publicacao.desc()).all()
     return render_template('blog.html', posts=posts)
 
+@app.route('/escrever', methods=['GET', 'POST'])
+def escrever():
+    registrar_visita(request, '/escrever')
+    if 'usuario_id' not in session:
+        return redirect(url_for('login'))
+
+    if request.method == 'POST':
+        titulo = request.form['titulo']
+        conteudo = request.form['conteudo']
+        imagem = request.form.get('imagem')
+        nova_postagem = Postagem(titulo=titulo, conteudo=conteudo, imagem=imagem)
+        db.session.add(nova_postagem)
+        db.session.commit()
+        return redirect(url_for('blog'))
+    return render_template('escrever.html')
+
+@app.route('/livros')
+def livros():
+    registrar_visita(request, '/livros')
+    return render_template('livros.html')
+
 @app.route('/comunidades')
 def comunidades():
     registrar_visita(request, '/comunidades')
@@ -168,7 +189,7 @@ def topico(comunidade_id, topico_id):
     topico = Topico.query.get_or_404(topico_id)
     if request.method == 'POST':
         mensagem = request.form.get('mensagem')
-        if mensagem:
+        if mensagem and 'usuario_id' in session:
             nova_mensagem = Mensagem(usuario_id=session['usuario_id'], topico_id=topico_id, conteudo=mensagem)
             db.session.add(nova_mensagem)
             db.session.commit()
