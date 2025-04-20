@@ -34,8 +34,9 @@
       padding: 2rem;
       border-radius: 12px;
       box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
-      max-width: 500px;
+      max-width: 600px;
       width: 100%;
+      margin-bottom: 2rem;
     }
 
     label {
@@ -44,7 +45,8 @@
       font-weight: bold;
     }
 
-    input[type="text"] {
+    input[type="text"],
+    select {
       width: 100%;
       padding: 0.8rem;
       border: none;
@@ -58,6 +60,10 @@
       color: #aaa;
     }
 
+    input[type="text"] {
+      autocomplete: off;
+    }
+
     button {
       background-color: #925eff;
       border: none;
@@ -68,6 +74,7 @@
       cursor: pointer;
       transition: background-color 0.3s ease;
       width: 100%;
+      margin-top: 0.5rem;
     }
 
     button:hover {
@@ -94,26 +101,52 @@
     .historico {
       margin-top: 2rem;
       max-width: 700px;
+      width: 100%;
+    }
+
+    .historico h3 {
+      color: #9bd;
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
     }
 
     .historico-item {
-      background-color: #1c1c2e;
-      margin-bottom: 1rem;
+      background-color: #2f2f44;
       padding: 1rem;
       border-radius: 10px;
+      margin-bottom: 1rem;
     }
 
     .historico-item strong {
-      color: #cba8ff;
+      display: block;
+      color: #ffc9ec;
+      margin-bottom: 0.5rem;
+    }
+
+    .apagar-container {
+      display: flex;
+      justify-content: center;
+      margin-top: 1rem;
+    }
+
+    .apagar-btn {
+      background-color: #e85555;
+      padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+      color: white;
+      transition: background-color 0.3s ease;
+    }
+
+    .apagar-btn:hover {
+      background-color: #d33;
     }
 
     @media (max-width: 600px) {
       body {
         padding: 1rem;
-      }
-
-      form {
-        padding: 1.5rem;
       }
 
       h1 {
@@ -129,9 +162,16 @@
 <body>
   <h1>✨ Maddie ✨</h1>
 
-  <form method="POST" aria-label="Formulário para enviar perguntas à Maddie">
+  <form method="POST">
     <label for="pergunta">Envie sua pergunta:</label>
-    <input type="text" id="pergunta" name="pergunta" required placeholder="Digite aqui...">
+    <input type="text" id="pergunta" name="pergunta" required placeholder="Digite aqui..." autocomplete="off">
+
+    <label for="estilo">Estilo da resposta:</label>
+    <select id="estilo" name="estilo">
+      <option value="poetica">Poética</option>
+      <option value="direta">Direta</option>
+    </select>
+
     <button type="submit">Consultar</button>
   </form>
 
@@ -142,13 +182,21 @@
 
   {% if historico %}
     <div class="historico">
-      <h2>✨ Suas perguntas anteriores:</h2>
+      <h3>Suas últimas perguntas:</h3>
       {% for item in historico %}
         <div class="historico-item">
-          <strong>Pergunta:</strong> {{ item.pergunta }}<br>
+          <strong>Pergunta:</strong> {{ item.pergunta }}
           <strong>Resposta:</strong> {{ item.resposta }}
+          <small><em>{{ item.estilo|capitalize }} — {{ item.data_hora.strftime('%d/%m/%Y %H:%M') }}</em></small>
         </div>
       {% endfor %}
+
+      <div class="apagar-container">
+        <form method="POST">
+          <input type="hidden" name="apagar_historico" value="1">
+          <button class="apagar-btn" type="submit">🗑️ Apagar histórico</button>
+        </form>
+      </div>
     </div>
   {% endif %}
 </body>

@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, send_file
+from flask import Flask, render_template, request, redirect, url_for, send_file
 from dotenv import load_dotenv
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
@@ -21,13 +21,12 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # Inicializa o banco de dados
 db = SQLAlchemy(app)
 
-# Modelo Visitante
+# Modelos
 class Visitante(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nome = db.Column(db.String(100))
     mensagem = db.Column(db.String(200))
 
-# Modelo Registro de Visita
 class RegistroVisita(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     ip = db.Column(db.String(100))
@@ -37,12 +36,12 @@ class RegistroVisita(db.Model):
     data_hora = db.Column(db.DateTime, default=datetime.utcnow)
     rota = db.Column(db.String(100))
 
-# Modelo de Interação com a Maddie
 class InteracaoMaddie(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     ip = db.Column(db.String(100))
     pergunta = db.Column(db.Text)
     resposta = db.Column(db.Text)
+    estilo = db.Column(db.String(50))
     data_hora = db.Column(db.DateTime, default=datetime.utcnow)
 
 # Função para registrar visita
@@ -59,13 +58,7 @@ def registrar_visita(request, rota):
             pais = dados.get("country_name", "Desconhecido")
     except:
         pass
-    nova_visita = RegistroVisita(
-        ip=ip,
-        user_agent=user_agent,
-        cidade=cidade,
-        pais=pais,
-        rota=rota
-    )
+    nova_visita = RegistroVisita(ip=ip, user_agent=user_agent, cidade=cidade, pais=pais, rota=rota)
     db.session.add(nova_visita)
     db.session.commit()
 
@@ -88,21 +81,21 @@ def livro():
     return render_template('eassimchoveu.html')
 
 # Integração com Gemini
-def gerar_resposta_gemini(pergunta):
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={gemini_api_key}"
-    headers = {
-        "Content-Type": "application/json"
+def gerar_resposta_gemini(pergunta, estilo):
+    prompt_inicial = {
+        "poetica": "Você é Maddie, uma entidade mística, inteligente e profunda. Responda de forma simbólica e poética.",
+        "direta": "Você é Maddie, uma assistente objetiva e clara. Responda de forma direta, mas com empatia."
     }
+    prompt = prompt_inicial.get(estilo, prompt_inicial["poetica"])
+
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={gemini_api_key}"
+    headers = {"Content-Type": "application/json"}
     data = {
         "contents": [
-            {
-                "parts": [
-                    {"text": "Você é Maddie, uma entidade mística, inteligente e profunda. Responda de forma simbólica e poética."},
-                    {"text": pergunta}
-                ]
-            }
+            {"parts": [{"text": prompt}, {"text": pergunta}]}
         ]
     }
+
     try:
         response = requests.post(url, headers=headers, json=data)
         if response.status_code == 200:
@@ -113,43 +106,32 @@ def gerar_resposta_gemini(pergunta):
     except Exception as e:
         return f"Erro inesperado: {e}"
 
-# Página da Maddie com retenção
+# Página da Maddie com retenção e personalização
 @app.route('/maddie', methods=['GET', 'POST'])
 def maddie():
     registrar_visita(request, '/maddie')
     resposta = ""
-    historico = []
-    if request.method == 'POST':
-        pergunta = request.form['pergunta']
-        resposta = gerar_resposta_gemini(pergunta)
+    historico = InteracaoMaddie.query.filter_by(ip=request.remote_addr).order_by(
+        InteracaoMaddie.data_hora.desc()).limit(10).all()
 
-        nova_interacao = InteracaoMaddie(
-            ip=request.remote_addr,
-            pergunta=pergunta,
-            resposta=resposta
-        )
+    if request.method == 'POST':
+        if 'apagar_historico' in request.form:
+            InteracaoMaddie.query.filter_by(ip=request.remote_addr).delete()
+            db.session.commit()
+            return redirect(url_for('maddie'))
+
+        pergunta = request.form['pergunta']
+        estilo = request.form.get('estilo', 'poetica')
+        resposta = gerar_resposta_gemini(pergunta, estilo)
+
+        nova_interacao = InteracaoMaddie(ip=request.remote_addr, pergunta=pergunta, resposta=resposta, estilo=estilo)
         db.session.add(nova_interacao)
         db.session.commit()
 
-    historico = InteracaoMaddie.query.filter_by(ip=request.remote_addr).order_by(
-        InteracaoMaddie.data_hora.desc()).limit(10).all()
+        historico = InteracaoMaddie.query.filter_by(ip=request.remote_addr).order_by(
+            InteracaoMaddie.data_hora.desc()).limit(10).all()
+
     return render_template('maddie.html', resposta=resposta, historico=historico)
-
-# Rota para registrar visitante
-@app.route('/registrar')
-def registrar():
-    registrar_visita(request, '/registrar')
-    novo = Visitante(nome="Mateus", mensagem="Salve, Madalina!")
-    db.session.add(novo)
-    db.session.commit()
-    return "Visitante registrado!"
-
-# Rota para listar visitantes
-@app.route('/visitantes')
-def visitantes():
-    registrar_visita(request, '/visitantes')
-    todos = Visitante.query.all()
-    return render_template('visitantes.html', visitantes=todos)
 
 # Rota para listar acessos registrados
 @app.route('/acessos')
@@ -162,20 +144,14 @@ def acessos():
 def relatorio_csv():
     visitas = RegistroVisita.query.order_by(RegistroVisita.data_hora.desc()).all()
     caminho_arquivo = os.path.join(basedir, 'relatorio_acessos.csv')
-
     with open(caminho_arquivo, mode='w', newline='', encoding='utf-8') as arquivo_csv:
         writer = csv.writer(arquivo_csv)
         writer.writerow(['Data/Hora', 'IP', 'Cidade', 'País', 'Rota', 'User-Agent'])
         for v in visitas:
             writer.writerow([
                 v.data_hora.strftime('%d/%m/%Y %H:%M:%S'),
-                v.ip,
-                v.cidade,
-                v.pais,
-                v.rota,
-                v.user_agent
+                v.ip, v.cidade, v.pais, v.rota, v.user_agent
             ])
-
     return send_file(caminho_arquivo, as_attachment=True)
 
 # Inicia o servidor
