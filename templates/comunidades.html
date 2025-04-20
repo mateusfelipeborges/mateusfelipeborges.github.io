@@ -1,15 +1,27 @@
+<!-- comunidades.html -->
 {% extends "base.html" %}
 
 {% block content %}
 <div class="container">
   <h2>Comunidades</h2>
-  <ul>
-    {% for comunidade in comunidades %}
-      <li>
-        <a href="{{ url_for('comunidade', comunidade_id=comunidade.id) }}">{{ comunidade.nome }}</a>
-        <p>{{ comunidade.descricao }}</p>
-      </li>
-    {% endfor %}
-  </ul>
+
+  {% if comunidades %}
+    <ul style="list-style-type: none; padding: 0;">
+      {% for comunidade in comunidades %}
+        <li style="margin-bottom: 20px; border-bottom: 1px solid #ccc; padding-bottom: 10px;">
+          <h3>
+            <a href="{{ url_for('comunidade', comunidade_id=comunidade.id) }}">
+              {{ comunidade.nome }}
+            </a>
+          </h3>
+          <p>{{ comunidade.descricao or "Sem descrição disponível." }}</p>
+          <small>Criada em {{ comunidade.data_criacao.strftime('%d/%m/%Y') }}</small>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>Não há comunidades disponíveis no momento.</p>
+  {% endif %}
+
 </div>
 {% endblock %}

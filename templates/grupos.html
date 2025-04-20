@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-purple-900 to-indigo-800 text-white py-12">
+  <div class="max-w-4xl mx-auto px-6">
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-8">
+      <h1 class="text-4xl font-bold">Grupos em {{ comunidade.nome }}</h1>
+      <a href="{{ url_for('comunidades') }}" class="text-indigo-300 hover:text-indigo-100 transition">
+        ← Voltar às Comunidades
+      </a>
+    </div>
+
+    <!-- Formulário de Criação de Grupo -->
+    <div class="bg-indigo-700 bg-opacity-30 rounded-lg p-6 mb-10 shadow-lg">
+      <h2 class="text-2xl font-semibold mb-4">Criar Novo Grupo</h2>
+      <form method="POST" action="{{ url_for('criar_grupo', comunidade_id=comunidade.id) }}" class="space-y-4">
+        <div>
+          <label for="nome" class="block text-sm font-medium mb-1">Nome do Grupo</label>
+          <input type="text" name="nome" id="nome" required
+                 class="w-full px-4 py-2 bg-indigo-800 bg-opacity-50 rounded text-white placeholder-indigo-300 focus:outline-none focus:ring-2 focus:ring-purple-500"/>
+        </div>
+        <div class="flex items-center gap-2">
+          <input type="checkbox" name="privado" id="privado" value="1"
+                 class="h-4 w-4 text-purple-600 bg-gray-700 rounded focus:ring-purple-500" />
+          <label for="privado" class="text-sm">Grupo Privado</label>
+        </div>
+        <button type="submit" class="px-6 py-2 bg-purple-600 hover:bg-purple-500 rounded-lg font-semibold transition">
+          Criar Grupo
+        </button>
+      </form>
+    </div>
+
+    <!-- Lista de Grupos -->
+    {% if grupos %}
+    <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      {% for grupo in grupos %}
+      <div class="bg-indigo-700 bg-opacity-40 rounded-lg p-6 shadow-inner hover:shadow-xl transition cursor-pointer">
+        <a href="{{ url_for('sala_chat', grupo_id=grupo.id) }}">
+          <h3 class="text-xl font-semibold mb-2">{{ grupo.nome }}</h3>
+        </a>
+        <p class="text-sm mb-4">
+          {% if grupo.privado %}
+            🔒 Privado
+          {% else %}
+            🌐 Público
+          {% endif %}
+        </p>
+        <div class="text-xs opacity-80 flex justify-between items-center">
+          <span>Criado em {{ grupo.data_criacao.strftime('%d/%m/%Y') if grupo.data_criacao else '—' }}</span>
+          <span>ID {{ grupo.id }}</span>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="text-center italic mt-8">Nenhum grupo criado nesta comunidade ainda.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
