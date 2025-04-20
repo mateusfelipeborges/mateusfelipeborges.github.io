@@ -8,7 +8,7 @@ import csv
 
 # Carrega variáveis do .env
 load_dotenv()
-deepseek_api_key = os.getenv("DEEPSEEK_API_KEY")
+openrouter_api_key = os.getenv("OPENROUTER_API_KEY")
 
 # Flask App
 app = Flask(__name__, static_folder='static', template_folder='templates')
@@ -79,7 +79,7 @@ def livro():
     registrar_visita(request, '/livro')
     return render_template('eassimchoveu.html')
 
-# Página da Maddie com integração à DeepSeek
+# Página da Maddie com integração à OpenRouter
 @app.route('/maddie', methods=['GET', 'POST'])
 def maddie():
     registrar_visita(request, '/maddie')
@@ -87,19 +87,32 @@ def maddie():
     if request.method == 'POST':
         pergunta = request.form['pergunta']
         try:
-            url = "https://api.deepseek.com/v1/chat/completions"
+            url = "https://openrouter.ai/api/v1/chat/completions"
             headers = {
-                "Authorization": f"Bearer {deepseek_api_key}",
-                "Content-Type": "application/json"
+                "Authorization": f"Bearer {openrouter_api_key}",
+                "Content-Type": "application/json",
+                "HTTP-Referer": "https://www.mateusfelipeborges.com",  # ou domínio que estiver usando
+                "X-Title": "Maddie"
             }
             data = {
-                "model": "deepseek-chat",
+                "model": "openai/gpt-3.5-turbo",  # ou outro modelo disponível
                 "messages": [
                     {"role": "system", "content": "Você é uma entidade chamada Maddie. Um ser inteligente, místico e racional. Suas respostas são poéticas, simbólicas e profundas."},
                     {"role": "user", "content": pergunta}
                 ]
             }
+
+            # DEBUG
+            print("🔑 API Key:", openrouter_api_key)
+            print("🌍 URL:", url)
+            print("🧾 Headers:", headers)
+            print("📤 Payload:", data)
+
             response = requests.post(url, headers=headers, json=data)
+
+            print("📬 Status Code:", response.status_code)
+            print("📨 Response Text:", response.text)
+
             if response.status_code == 200:
                 result = response.json()
                 if 'choices' in result and len(result['choices']) > 0:
@@ -163,4 +176,3 @@ if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
     print(f"Iniciando servidor Flask na porta {port}...")
     app.run(debug=False, host='0.0.0.0', port=port)
-
