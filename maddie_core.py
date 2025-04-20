@@ -1,13 +1,16 @@
 import os
 import requests
+import sqlite3
 from dotenv import load_dotenv
 
 # Carrega variáveis do .env
 load_dotenv()
 gemini_api_key = os.getenv("GEMINI_API_KEY")
 
+# ===============================
+# 🌟 CLASSE MADDIE
+# ===============================
 
-# Classe principal da Maddie
 class Maddie:
     def __init__(self, estilo="poetica"):
         self.estilo = estilo
@@ -55,7 +58,10 @@ class Maddie:
             return f"[Maddie poética] Sob os véus do invisível, tua dúvida ecoa: '{pergunta}'... e mesmo sem saber, ressoo contigo."
 
 
-# Interface para o app.py
+# ===============================
+# 💬 INTERFACE PARA O APP
+# ===============================
+
 def gerar_resposta_local(pergunta, estilo):
     maddie = Maddie(estilo=estilo)
     resposta = maddie.responder_com_modelo_local(pergunta)
@@ -64,4 +70,33 @@ def gerar_resposta_local(pergunta, estilo):
     if "ainda não" in resposta.lower() or "erro" in resposta.lower():
         resposta = maddie.responder_com_gemini(pergunta)
 
+    return resposta
+
+
+# ===============================
+# 📖 BUSCA EM LIVROS PROCESSADOS
+# ===============================
+
+def buscar_termo_em_livro(nome_livro, termo):
+    db_path = os.path.join("bases_teoricas", f"{nome_livro}.db")
+    if not os.path.exists(db_path):
+        return f"⚠️ O livro '{nome_livro}' não foi encontrado."
+
+    try:
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+        cursor.execute("SELECT pagina, conteudo FROM paginas WHERE conteudo LIKE ?", (f"%{termo}%",))
+        resultados = cursor.fetchall()
+        conn.close()
+    except Exception as e:
+        return f"Erro ao acessar o livro: {e}"
+
+    if not resultados:
+        return f"🔍 Nenhum resultado encontrado para '{termo}' em '{nome_livro}'."
+
+    resposta = f"🔎 Resultados para **'{termo}'** em *{nome_livro}*:\n"
+    for pagina, conteudo in resultados[:5]:  # limita a 5 trechos
+        trecho = conteudo[:300] + "..." if len(conteudo) > 300 else conteudo
+        resposta += f"\n📄 Página {pagina}:\n{trecho}\n"
+    
     return resposta

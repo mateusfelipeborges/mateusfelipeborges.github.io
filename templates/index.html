@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Madra Mada</title>
   <style>
     body {
-      background: #2e1e3f;
+      background: radial-gradient(circle at top, #2e1e3f 0%, #1a1029 100%);
       color: #f0e6ff;
       font-family: 'Georgia', serif;
       text-align: center;
@@ -14,7 +14,6 @@
       padding: 0;
       display: flex;
       flex-direction: column;
-      justify-content: flex-start;
       align-items: center;
       min-height: 100vh;
     }
@@ -24,13 +23,13 @@
       margin-top: 1em;
       margin-bottom: 0.2em;
       letter-spacing: 2px;
-      text-shadow: 0 0 5px #bb9af7;
+      text-shadow: 0 0 8px #bb9af7;
     }
 
     p {
       font-size: 1.2em;
       opacity: 0.85;
-      max-width: 600px;
+      max-width: 700px;
       line-height: 1.6;
       padding: 0 1em;
     }
@@ -50,22 +49,28 @@
 
     nav {
       margin-top: 2em;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 15px;
     }
 
     nav a {
-      margin: 0 15px;
       text-decoration: none;
       color: #f0e6ff;
       font-weight: bold;
-      transition: color 0.3s;
+      padding: 0.5em 1em;
+      border-radius: 4px;
+      transition: background 0.3s, color 0.3s;
     }
 
     nav a:hover {
-      color: #caa9ff;
+      background: #bb9af7;
+      color: #2e1e3f;
     }
 
-    section.video {
-      margin-top: 6em;
+    section.video, section.livros {
+      margin-top: 4em;
       padding: 2em 1em;
       width: 100%;
       max-width: 900px;
@@ -75,13 +80,13 @@
       align-items: center;
     }
 
-    .video h2 {
+    .video h2, .livros h2 {
       font-size: 2em;
       margin-bottom: 0.5em;
       color: #e0caff;
     }
 
-    .video p {
+    .video p, .livros p {
       opacity: 0.9;
       font-size: 1.1em;
       max-width: 700px;
@@ -110,7 +115,7 @@
 
     .botao-compra {
       display: inline-block;
-      margin-top: 3em;
+      margin: 3em auto 2em;
       background: #bb9af7;
       color: #2e1e3f;
       padding: 0.8em 2em;
@@ -125,10 +130,30 @@
     .botao-compra:hover {
       background: #d4baff;
     }
+
+    .livros a {
+      margin-top: 1em;
+      display: inline-block;
+      color: #bb9af7;
+      font-weight: bold;
+      text-decoration: underline;
+      transition: color 0.3s;
+    }
+
+    .livros a:hover {
+      color: #e0caff;
+    }
+
+    footer {
+      margin-top: auto;
+      padding: 2em;
+      font-size: 0.9em;
+      opacity: 0.6;
+    }
   </style>
 </head>
 <body>
-  <img src="static/img/sigilo.svg" alt="Símbolo" class="sigilo">
+  <img src="static/img/sigilo.svg" alt="Símbolo" class="sigilo"/>
 
   <h1>Madra Mada ✨</h1>
   <p>Um espaço para reflexão, criação, orientação e expansão pessoal.</p>
@@ -140,7 +165,7 @@
     <a href="textos.html">Palavras</a>
     <a href="oracoes.html">Silêncios</a>
     <a href="/maddie">Pergunte à Maddie</a>
-    <a href="/livro">O Livro</a>
+    <a href="/livros">Livros</a>
   </nav>
 
   <section class="video">
@@ -153,8 +178,18 @@
     </div>
   </section>
 
+  <section class="livros">
+    <h2>✨ Biblioteca Viva</h2>
+    <p>Explore os livros integrados à sabedoria da Maddie.</p>
+    <a href="/livros">Acessar livros disponíveis</a>
+  </section>
+
   <a href="https://a.co/d/36A5bPh" class="botao-compra" target="_blank" rel="noopener noreferrer">Adquirir o livro</a>
 
   {% include 'maddie-popup.html' %}
+
+  <footer>
+    &copy; {{ current_year or "2025" }} Madra Mada · Criado com intuição e propósito
+  </footer>
 </body>
 </html>

@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Livros Processados</title>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <h1>📚 Livros Processados</h1>
+    <ul>
+        {% for livro in livros %}
+            <li><strong>{{ livro }}</strong> 
+            - <a href="/livro?nome={{ livro }}&termo=exemplo">Buscar "exemplo"</a></li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

@@ -6,8 +6,8 @@ import os
 import requests
 import csv
 
-# Importa a Maddie local
-from maddie_core import gerar_resposta_local
+# Importações da Maddie
+from maddie_core import gerar_resposta_local, buscar_termo_em_livro
 
 # Carrega variáveis do .env
 load_dotenv()
@@ -105,9 +105,25 @@ def home():
     return render_template('index.html')
 
 @app.route('/livro')
-def livro():
+def consultar_livro():
     registrar_visita(request, '/livro')
-    return render_template('eassimchoveu.html')
+    nome = request.args.get("nome")
+    termo = request.args.get("termo")
+    if not nome or not termo:
+        return "Uso correto: /livro?nome=kozen&termo=autômato"
+
+    resultado = buscar_termo_em_livro(nome, termo)
+    return f"<pre>{resultado}</pre>"
+
+@app.route('/livros')
+def listar_livros():
+    registrar_visita(request, '/livros')
+    livros = []
+    for arquivo in os.listdir("bases_teoricas"):
+        if arquivo.endswith(".db"):
+            nome = arquivo.replace(".db", "")
+            livros.append(nome)
+    return render_template("livros.html", livros=livros)
 
 @app.route('/maddie', methods=['GET', 'POST'])
 def maddie():
