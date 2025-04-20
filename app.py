@@ -53,6 +53,8 @@ class Postagem(db.Model):
     conteudo = db.Column(db.Text)
     imagem = db.Column(db.String(300))
     data_publicacao = db.Column(db.DateTime, default=datetime.utcnow)
+    usuario_id = db.Column(db.Integer, db.ForeignKey('usuario.id'))
+    autor = db.relationship('Usuario', backref=db.backref('postagens', lazy=True))
 
 class Usuario(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -144,6 +146,32 @@ def cadastro():
         )
         db.session.add(novo)
         db.session.commit()
+
+        # Enviar notificação por e-mail (simples via SMTP)
+        import smtplib
+        from email.mime.text import MIMEText
+
+        try:
+            remetente = os.getenv('SMTP_USER')
+            senha = os.getenv('SMTP_PASS')
+            destinatario = os.getenv('ADMIN_EMAIL')
+
+            corpo = f"Novo cadastro:
+
+Nome: {novo.nome_completo}
+Email: {novo.email}
+Pronomes: {novo.pronomes}"
+            mensagem = MIMEText(corpo)
+            mensagem['Subject'] = 'Novo Cadastro no Site'
+            mensagem['From'] = remetente
+            mensagem['To'] = destinatario
+
+            with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
+                smtp.login(remetente, senha)
+                smtp.send_message(mensagem)
+        except Exception as e:
+            print("Erro ao enviar e-mail:", e)
+
         return redirect(url_for('login'))
     return render_template('cadastro.html')
 
@@ -215,8 +243,20 @@ def escrever():
     if request.method == 'POST':
         titulo = request.form['titulo']
         conteudo = request.form['conteudo']
-        imagem = request.form.get('imagem')
-        nova_postagem = Postagem(titulo=titulo, conteudo=conteudo, imagem=imagem)
+        imagem_arquivo = request.files.get('imagem')
+        nome_arquivo = None
+
+        if imagem_arquivo and imagem_arquivo.filename != '':
+            nome_arquivo = f"{datetime.utcnow().timestamp()}_{imagem_arquivo.filename}"
+            caminho = os.path.join(app.config['UPLOAD_FOLDER'], nome_arquivo)
+            imagem_arquivo.save(caminho)
+
+        nova_postagem = Postagem(
+            titulo=titulo,
+            conteudo=conteudo,
+            imagem=f"/static/uploads/{nome_arquivo}" if nome_arquivo else None,
+            usuario_id=session['usuario_id']
+        )
         db.session.add(nova_postagem)
         db.session.commit()
         return redirect(url_for('blog'))
