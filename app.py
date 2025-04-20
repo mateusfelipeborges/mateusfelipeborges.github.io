@@ -6,7 +6,7 @@ import os
 import requests
 import csv
 
-# Importações da IA Maddie
+# 🌿 Integrações internas
 from maddie_core import gerar_resposta_local, buscar_termo_em_livro
 
 # ===============================
@@ -16,10 +16,14 @@ from maddie_core import gerar_resposta_local, buscar_termo_em_livro
 load_dotenv()
 app = Flask(__name__, static_folder='static', template_folder='templates')
 
-# Banco de dados SQLite
 basedir = os.path.abspath(os.path.dirname(__file__))
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'madra.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# Diretório para uploads
+UPLOAD_FOLDER = os.path.join('static', 'uploads')
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 db = SQLAlchemy(app)
 
@@ -48,10 +52,12 @@ class InteracaoMaddie(db.Model):
     resposta = db.Column(db.Text)
     data_hora = db.Column(db.DateTime, default=datetime.utcnow)
 
+# 🔮 Blog — suporte a imagens
 class Postagem(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     titulo = db.Column(db.String(200))
     conteudo = db.Column(db.Text)
+    imagem = db.Column(db.String(300))
     data_publicacao = db.Column(db.DateTime, default=datetime.utcnow)
 
 # ===============================
@@ -119,7 +125,6 @@ def maddie():
             return redirect(url_for('maddie'))
 
         pergunta = request.form.get('pergunta', '').strip()
-
         if pergunta:
             resposta = gerar_resposta_local(pergunta)
             nova_interacao = InteracaoMaddie(ip=request.remote_addr, pergunta=pergunta, resposta=resposta)
@@ -142,8 +147,16 @@ def escrever():
     if request.method == 'POST':
         titulo = request.form.get('titulo', '').strip()
         conteudo = request.form.get('conteudo', '').strip()
+        imagem_arquivo = request.files.get('imagem')
+
+        nome_imagem = None
+        if imagem_arquivo and imagem_arquivo.filename:
+            nome_imagem = imagem_arquivo.filename
+            caminho = os.path.join(app.config['UPLOAD_FOLDER'], nome_imagem)
+            imagem_arquivo.save(caminho)
+
         if titulo and conteudo:
-            nova_postagem = Postagem(titulo=titulo, conteudo=conteudo)
+            nova_postagem = Postagem(titulo=titulo, conteudo=conteudo, imagem=nome_imagem)
             db.session.add(nova_postagem)
             db.session.commit()
             return redirect(url_for('blog'))

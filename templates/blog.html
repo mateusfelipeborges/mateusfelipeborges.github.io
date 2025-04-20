@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "base.html" %} 
 {% block content %}
 <style>
   .blog-container {
@@ -13,6 +13,7 @@
   .blog-post {
     border-bottom: 1px solid #3c364f;
     padding: 1rem 0;
+    margin-bottom: 2rem;
   }
   .blog-post h2 {
     margin: 0;
@@ -27,6 +28,12 @@
   .blog-post small {
     color: #9e95b8;
     font-size: 0.85rem;
+  }
+  .blog-post img {
+    width: 100%;
+    border-radius: 10px;
+    margin: 1rem 0;
+    box-shadow: 0 0 10px rgba(0,0,0,0.2);
   }
   .escrever-link {
     display: inline-block;
@@ -49,6 +56,9 @@
     <div class="blog-post">
       <h2>{{ post.titulo }}</h2>
       <small>Publicado em {{ post.data_publicacao.strftime('%d/%m/%Y %H:%M') }}</small>
+      {% if post.imagem %}
+        <img src="{{ url_for('static', filename='uploads/' + post.imagem) }}" alt="Imagem da postagem">
+      {% endif %}
       <p>{{ post.conteudo[:300] }}...</p>
     </div>
   {% else %}
