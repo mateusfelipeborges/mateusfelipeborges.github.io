@@ -113,6 +113,37 @@ def home():
     registrar_visita(request, '/')
     return render_template('index.html')
 
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        email = request.form.get('email', '').strip()
+        senha = request.form.get('senha', '').strip()
+        usuario = Usuario.query.filter_by(email=email).first()
+        if usuario and check_password_hash(usuario.senha, senha):
+            session['usuario_id'] = usuario.id
+            session['usuario_nome'] = usuario.nome_completo
+            session['is_admin'] = usuario.admin
+            return redirect(url_for('home'))
+        return render_template('login.html', error='Email ou senha inválidos.')
+    return render_template('login.html')
+
+@app.route('/cadastro', methods=['GET', 'POST'])
+def cadastro():
+    if request.method == 'POST':
+        novo = Usuario(
+            nome_completo=request.form['nome_completo'],
+            idade=int(request.form['idade']),
+            apelido=request.form['apelido'],
+            pronomes=request.form['pronomes'],
+            nome_artistico=request.form['nome_artistico'],
+            email=request.form['email'],
+            senha=generate_password_hash(request.form['senha'])
+        )
+        db.session.add(novo)
+        db.session.commit()
+        return redirect(url_for('login'))
+    return render_template('cadastro.html')
+
 @app.route('/blog')
 def blog():
     registrar_visita(request, '/blog')
