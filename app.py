@@ -88,7 +88,6 @@ def livro():
     return render_template('eassimchoveu.html')
 
 # Integração com Gemini
-
 def gerar_resposta_gemini(pergunta):
     url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={gemini_api_key}"
     headers = {
@@ -132,7 +131,8 @@ def maddie():
         db.session.add(nova_interacao)
         db.session.commit()
 
-    historico = InteracaoMaddie.query.filter_by(ip=request.remote_addr).order_by(InteracaoMaddie.data_hora.desc()).limit(10).all()
+    historico = InteracaoMaddie.query.filter_by(ip=request.remote_addr).order_by(
+        InteracaoMaddie.data_hora.desc()).limit(10).all()
     return render_template('maddie.html', resposta=resposta, historico=historico)
 
 # Rota para registrar visitante
