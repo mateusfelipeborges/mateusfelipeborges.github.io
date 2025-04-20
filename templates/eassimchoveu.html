@@ -64,6 +64,61 @@
       opacity: 0.6;
       padding-bottom: 2em;
     }
+
+    /* Popup */
+    #maddie-popup {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 1000;
+    }
+
+    #popup-content {
+      display: none;
+      flex-direction: column;
+      background: #1e1e2e;
+      color: #fff;
+      padding: 1rem;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+      width: 280px;
+    }
+
+    #popup-content h3 {
+      margin: 0 0 1rem;
+      font-size: 1.2rem;
+      color: #cba8ff;
+    }
+
+    #popup-content input {
+      padding: 0.5rem;
+      margin-bottom: 0.5rem;
+      border: none;
+      border-radius: 6px;
+      width: 100%;
+      background: #2e2e40;
+      color: #fff;
+    }
+
+    #popup-content button {
+      padding: 0.5rem;
+      background: #925eff;
+      border: none;
+      color: white;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    #abrir-popup {
+      background: #925eff;
+      color: white;
+      padding: 0.8rem 1rem;
+      border: none;
+      border-radius: 50%;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -81,5 +136,26 @@
   <footer>
     © Madra Mada – todos os direitos reservados
   </footer>
+
+  <!-- Popup da Maddie -->
+  <div id="maddie-popup">
+    <button id="abrir-popup">🜃</button>
+    <div id="popup-content">
+      <h3>Oráculo da Maddie</h3>
+      <form method="POST" action="/maddie">
+        <input type="text" name="pergunta" placeholder="Digite sua pergunta" required>
+        <button type="submit">Perguntar</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const btn = document.getElementById('abrir-popup');
+    const popup = document.getElementById('popup-content');
+
+    btn.addEventListener('click', () => {
+      popup.style.display = popup.style.display === 'flex' ? 'none' : 'flex';
+    });
+  </script>
 </body>
 </html>
