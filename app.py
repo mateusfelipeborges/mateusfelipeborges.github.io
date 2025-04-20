@@ -37,6 +37,14 @@ class RegistroVisita(db.Model):
     data_hora = db.Column(db.DateTime, default=datetime.utcnow)
     rota = db.Column(db.String(100))
 
+# Modelo de Interação com a Maddie
+class InteracaoMaddie(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    ip = db.Column(db.String(100))
+    pergunta = db.Column(db.Text)
+    resposta = db.Column(db.Text)
+    data_hora = db.Column(db.DateTime, default=datetime.utcnow)
+
 # Função para registrar visita
 def registrar_visita(request, rota):
     ip = request.remote_addr
@@ -79,7 +87,8 @@ def livro():
     registrar_visita(request, '/livro')
     return render_template('eassimchoveu.html')
 
-# Integração com Gemini (modelo correto)
+# Integração com Gemini
+
 def gerar_resposta_gemini(pergunta):
     url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={gemini_api_key}"
     headers = {
@@ -105,15 +114,26 @@ def gerar_resposta_gemini(pergunta):
     except Exception as e:
         return f"Erro inesperado: {e}"
 
-# Página da Maddie
+# Página da Maddie com retenção
 @app.route('/maddie', methods=['GET', 'POST'])
 def maddie():
     registrar_visita(request, '/maddie')
     resposta = ""
+    historico = []
     if request.method == 'POST':
         pergunta = request.form['pergunta']
         resposta = gerar_resposta_gemini(pergunta)
-    return render_template('maddie.html', resposta=resposta)
+
+        nova_interacao = InteracaoMaddie(
+            ip=request.remote_addr,
+            pergunta=pergunta,
+            resposta=resposta
+        )
+        db.session.add(nova_interacao)
+        db.session.commit()
+
+    historico = InteracaoMaddie.query.filter_by(ip=request.remote_addr).order_by(InteracaoMaddie.data_hora.desc()).limit(10).all()
+    return render_template('maddie.html', resposta=resposta, historico=historico)
 
 # Rota para registrar visitante
 @app.route('/registrar')
