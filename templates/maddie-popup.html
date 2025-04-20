@@ -1,0 +1,70 @@
+<!-- Pop-up da Maddie -->
+<div id="maddie-popup" class="popup">
+    <button id="toggle-popup" class="popup-button">🔮 Falar com Maddie</button>
+    <div class="popup-content">
+      <iframe src="/maddie" frameborder="0" class="popup-frame"></iframe>
+    </div>
+  </div>
+  
+  <style>
+    .popup {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+    }
+  
+    .popup-button {
+      background-color: #925eff;
+      color: white;
+      border: none;
+      padding: 0.7rem 1.2rem;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background-color 0.3s ease;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+  
+    .popup-button:hover {
+      background-color: #7a4ae6;
+    }
+  
+    .popup-content {
+      display: none;
+      margin-top: 10px;
+      border: 2px solid #925eff;
+      border-radius: 12px;
+      overflow: hidden;
+      width: 400px;
+      height: 500px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+      background-color: #1c1c2e;
+    }
+  
+    .popup-frame {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+  
+    @media (max-width: 600px) {
+      .popup-content {
+        width: 90vw;
+        height: 70vh;
+      }
+    }
+  </style>
+  
+  <script>
+    const toggleButton = document.getElementById('toggle-popup');
+    const popupContent = document.querySelector('.popup-content');
+  
+    toggleButton.addEventListener('click', () => {
+      popupContent.style.display = popupContent.style.display === 'block' ? 'none' : 'block';
+    });
+  </script>
+  
