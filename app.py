@@ -10,18 +10,18 @@ import csv
 load_dotenv()
 gemini_api_key = os.getenv("GEMINI_API_KEY")
 
-# Flask App
+# Inicializa o app Flask
 app = Flask(__name__, static_folder='static', template_folder='templates')
 
-# Configuração do Banco de Dados SQLite
+# Configuração do banco SQLite
 basedir = os.path.abspath(os.path.dirname(__file__))
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'madra.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Inicializa o banco de dados
+# Banco de dados
 db = SQLAlchemy(app)
 
-# Modelos
+# Modelos de banco
 class Visitante(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nome = db.Column(db.String(100))
@@ -44,25 +44,26 @@ class InteracaoMaddie(db.Model):
     estilo = db.Column(db.String(50))
     data_hora = db.Column(db.DateTime, default=datetime.utcnow)
 
-# Função para registrar visita
+# Função de registro de visitas
 def registrar_visita(request, rota):
-    ip = request.remote_addr
-    user_agent = request.headers.get('User-Agent')
+    ip = request.remote_addr or '0.0.0.0'
+    user_agent = request.headers.get('User-Agent', 'Desconhecido')
     cidade = "Desconhecida"
     pais = "Desconhecido"
     try:
         response = requests.get(f"https://ipapi.co/{ip}/json/")
         if response.status_code == 200:
             dados = response.json()
-            cidade = dados.get("city", "Desconhecida")
-            pais = dados.get("country_name", "Desconhecido")
-    except:
-        pass
+            cidade = dados.get("city", cidade)
+            pais = dados.get("country_name", pais)
+    except Exception as e:
+        print("Erro ao consultar localização:", e)
+
     nova_visita = RegistroVisita(ip=ip, user_agent=user_agent, cidade=cidade, pais=pais, rota=rota)
     db.session.add(nova_visita)
     db.session.commit()
 
-# ROTA MANUAL PARA CRIAR O BANCO
+# Rota para criar o banco
 @app.route('/criar_banco')
 def criar_banco():
     db.create_all()
@@ -80,7 +81,7 @@ def livro():
     registrar_visita(request, '/livro')
     return render_template('eassimchoveu.html')
 
-# Integração com Gemini
+# Função que gera a resposta com Gemini
 def gerar_resposta_gemini(pergunta, estilo):
     prompt_inicial = {
         "poetica": "Você é Maddie, uma entidade mística, inteligente e profunda. Responda de forma simbólica e poética.",
@@ -91,22 +92,20 @@ def gerar_resposta_gemini(pergunta, estilo):
     url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={gemini_api_key}"
     headers = {"Content-Type": "application/json"}
     data = {
-        "contents": [
-            {"parts": [{"text": prompt}, {"text": pergunta}]}
-        ]
+        "contents": [{"parts": [{"text": prompt}, {"text": pergunta}]}]
     }
 
     try:
         response = requests.post(url, headers=headers, json=data)
-        if response.status_code == 200:
-            resultado = response.json()
-            return resultado['candidates'][0]['content']['parts'][0]['text']
-        else:
-            return f"Erro {response.status_code}: {response.text}"
+        response.raise_for_status()
+        resultado = response.json()
+        return resultado['candidates'][0]['content']['parts'][0]['text']
+    except requests.exceptions.RequestException as e:
+        return f"Erro de conexão: {e}"
     except Exception as e:
         return f"Erro inesperado: {e}"
 
-# Página da Maddie com retenção e personalização
+# Página da Maddie com retenção
 @app.route('/maddie', methods=['GET', 'POST'])
 def maddie():
     registrar_visita(request, '/maddie')
@@ -120,30 +119,37 @@ def maddie():
             db.session.commit()
             return redirect(url_for('maddie'))
 
-        pergunta = request.form['pergunta']
+        pergunta = request.form.get('pergunta', '').strip()
         estilo = request.form.get('estilo', 'poetica')
-        resposta = gerar_resposta_gemini(pergunta, estilo)
 
-        nova_interacao = InteracaoMaddie(ip=request.remote_addr, pergunta=pergunta, resposta=resposta, estilo=estilo)
-        db.session.add(nova_interacao)
-        db.session.commit()
+        if pergunta:
+            resposta = gerar_resposta_gemini(pergunta, estilo)
+            nova_interacao = InteracaoMaddie(
+                ip=request.remote_addr,
+                pergunta=pergunta,
+                resposta=resposta,
+                estilo=estilo
+            )
+            db.session.add(nova_interacao)
+            db.session.commit()
 
-        historico = InteracaoMaddie.query.filter_by(ip=request.remote_addr).order_by(
-            InteracaoMaddie.data_hora.desc()).limit(10).all()
+            historico = InteracaoMaddie.query.filter_by(ip=request.remote_addr).order_by(
+                InteracaoMaddie.data_hora.desc()).limit(10).all()
 
     return render_template('maddie.html', resposta=resposta, historico=historico)
 
-# Rota para listar acessos registrados
+# Rota para exibir acessos
 @app.route('/acessos')
 def acessos():
     visitas = RegistroVisita.query.order_by(RegistroVisita.data_hora.desc()).all()
     return render_template('acessos.html', visitas=visitas)
 
-# Gera e baixa o relatório de acessos como CSV
+# Geração do relatório CSV
 @app.route('/relatorio_csv')
 def relatorio_csv():
     visitas = RegistroVisita.query.order_by(RegistroVisita.data_hora.desc()).all()
     caminho_arquivo = os.path.join(basedir, 'relatorio_acessos.csv')
+
     with open(caminho_arquivo, mode='w', newline='', encoding='utf-8') as arquivo_csv:
         writer = csv.writer(arquivo_csv)
         writer.writerow(['Data/Hora', 'IP', 'Cidade', 'País', 'Rota', 'User-Agent'])
@@ -154,7 +160,7 @@ def relatorio_csv():
             ])
     return send_file(caminho_arquivo, as_attachment=True)
 
-# Inicia o servidor
+# Executa o servidor
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
     print(f"Iniciando servidor Flask na porta {port}...")
