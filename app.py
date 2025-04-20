@@ -6,27 +6,24 @@ import os
 import requests
 import csv
 
-# Importações da Maddie
+# Importações da IA Maddie
 from maddie_core import gerar_resposta_local, buscar_termo_em_livro
 
-# Carrega variáveis do .env
+# ===============================
+# ⚙️ CONFIGURAÇÕES INICIAIS
+# ===============================
+
 load_dotenv()
-gemini_api_key = os.getenv("GEMINI_API_KEY")
-
-# Define se a lógica será local ou via API
-MODO_LOCAL = True
-
-# Flask App
 app = Flask(__name__, static_folder='static', template_folder='templates')
 
-# Banco de Dados
+# Banco de dados SQLite
 basedir = os.path.abspath(os.path.dirname(__file__))
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'madra.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 # ===============================
-# 📦 MODELOS
+# 📦 MODELOS DO BANCO DE DADOS
 # ===============================
 
 class Visitante(db.Model):
@@ -48,11 +45,10 @@ class InteracaoMaddie(db.Model):
     ip = db.Column(db.String(100))
     pergunta = db.Column(db.Text)
     resposta = db.Column(db.Text)
-    estilo = db.Column(db.String(50))
     data_hora = db.Column(db.DateTime, default=datetime.utcnow)
 
 # ===============================
-# 📍 FUNÇÕES AUXILIARES
+# 🛠 FUNÇÕES AUXILIARES
 # ===============================
 
 def registrar_visita(request, rota):
@@ -67,31 +63,13 @@ def registrar_visita(request, rota):
             pais = dados.get("country_name", pais)
     except Exception as e:
         print("Erro ao buscar localização:", e)
+
     nova_visita = RegistroVisita(ip=ip, user_agent=user_agent, cidade=cidade, pais=pais, rota=rota)
     db.session.add(nova_visita)
     db.session.commit()
 
-def gerar_resposta_gemini(pergunta, estilo):
-    prompt_inicial = {
-        "poetica": "Você é Maddie, uma entidade mística, inteligente e profunda. Responda de forma simbólica e poética.",
-        "direta": "Você é Maddie, uma assistente objetiva e clara. Responda de forma direta, mas com empatia."
-    }
-    prompt = prompt_inicial.get(estilo, prompt_inicial["poetica"])
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={gemini_api_key}"
-    headers = {"Content-Type": "application/json"}
-    data = {"contents": [{"parts": [{"text": prompt}, {"text": pergunta}]}]}
-    try:
-        response = requests.post(url, headers=headers, json=data)
-        response.raise_for_status()
-        resultado = response.json()
-        return resultado['candidates'][0]['content']['parts'][0]['text']
-    except requests.exceptions.RequestException as e:
-        return f"Erro de conexão com a API Gemini: {e}"
-    except Exception as e:
-        return f"Erro inesperado: {e}"
-
 # ===============================
-# 🌐 ROTAS
+# 🌐 ROTAS DO FLASK
 # ===============================
 
 @app.route('/criar_banco')
@@ -104,6 +82,16 @@ def home():
     registrar_visita(request, '/')
     return render_template('index.html')
 
+@app.route('/livros')
+def listar_livros():
+    registrar_visita(request, '/livros')
+    livros = []
+    for arquivo in os.listdir("bases_teoricas"):
+        if arquivo.endswith(".db"):
+            nome = arquivo.replace(".db", "")
+            livros.append(nome)
+    return render_template("livros.html", livros=livros)
+
 @app.route('/livro')
 def consultar_livro():
     registrar_visita(request, '/livro')
@@ -114,16 +102,6 @@ def consultar_livro():
 
     resultado = buscar_termo_em_livro(nome, termo)
     return f"<pre>{resultado}</pre>"
-
-@app.route('/livros')
-def listar_livros():
-    registrar_visita(request, '/livros')
-    livros = []
-    for arquivo in os.listdir("bases_teoricas"):
-        if arquivo.endswith(".db"):
-            nome = arquivo.replace(".db", "")
-            livros.append(nome)
-    return render_template("livros.html", livros=livros)
 
 @app.route('/maddie', methods=['GET', 'POST'])
 def maddie():
@@ -139,21 +117,14 @@ def maddie():
             return redirect(url_for('maddie'))
 
         pergunta = request.form.get('pergunta', '').strip()
-        estilo = request.form.get('estilo', 'poetica')
 
         if pergunta:
-            if MODO_LOCAL:
-                resposta = gerar_resposta_local(pergunta, estilo)
-                if not resposta or "não implementado" in resposta.lower():
-                    resposta = gerar_resposta_gemini(pergunta, estilo)
-            else:
-                resposta = gerar_resposta_gemini(pergunta, estilo)
+            resposta = gerar_resposta_local(pergunta)
 
             nova_interacao = InteracaoMaddie(
                 ip=request.remote_addr,
                 pergunta=pergunta,
-                resposta=resposta,
-                estilo=estilo
+                resposta=resposta
             )
             db.session.add(nova_interacao)
             db.session.commit()

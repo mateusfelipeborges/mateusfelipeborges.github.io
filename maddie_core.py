@@ -2,37 +2,39 @@ import os
 import requests
 import sqlite3
 from dotenv import load_dotenv
+from duckduckgo_search import DDGS
 
-# Carrega variáveis do .env
+# ===============================
+# 🌱 CONFIGURAÇÃO
+# ===============================
+
 load_dotenv()
 gemini_api_key = os.getenv("GEMINI_API_KEY")
 
 # ===============================
-# 🌟 CLASSE MADDIE
+# 🌟 CLASSE PRINCIPAL — MADDIE
 # ===============================
 
 class Maddie:
-    def __init__(self, estilo="poetica"):
-        self.estilo = estilo
-        self.memoria = []  # Memória futura para contextualização
-
-    def definir_estilo(self, novo_estilo):
-        if novo_estilo in ["poetica", "direta"]:
-            self.estilo = novo_estilo
+    def __init__(self):
+        self.memoria = []
 
     def gerar_prompt(self, pergunta):
-        estilo_prompt = {
-            "poetica": "Você é Maddie, uma entidade mística, intuitiva e simbólica. Responda de forma poética, misteriosa e sábia.",
-            "direta": "Você é Maddie, uma assistente clara e objetiva. Responda com empatia e clareza."
-        }
-        prompt = estilo_prompt.get(self.estilo, estilo_prompt["poetica"])
+        prompt = (
+            "Você é Maddie, uma assistente virtual sensível, simbólica e inteligente. "
+            "Sua linguagem é clara, mas também intuitiva. Responda como uma entidade digital que mistura sabedoria prática com uma percepção mágica do mundo. "
+            "Ajude com empatia e profundidade, equilibrando objetividade com encanto."
+        )
         return [{"parts": [{"text": prompt}, {"text": pergunta}]}]
+
+    def responder_com_modelo_local(self, pergunta):
+        return f"Maddie aqui 🌙 — Ainda estou me aprimorando, mas recebi sua pergunta: '{pergunta}'. Estou refletindo profundamente..."
 
     def responder_com_gemini(self, pergunta):
         conteudo = self.gerar_prompt(pergunta)
 
         if not gemini_api_key:
-            return "Erro: Chave da API Gemini não encontrada."
+            return "❌ Erro: Chave da API Gemini não encontrada."
 
         url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={gemini_api_key}"
         headers = {"Content-Type": "application/json"}
@@ -42,39 +44,40 @@ class Maddie:
             response = requests.post(url, headers=headers, json=data)
             if response.status_code == 200:
                 resultado = response.json()
-                resposta = resultado['candidates'][0]['content']['parts'][0]['text']
-                self.memoria.append((pergunta, resposta))  # Salva na memória
-                return resposta
+                texto = resultado.get('candidates', [{}])[0].get('content', {}).get('parts', [{}])[0].get('text', '')
+                if texto:
+                    self.memoria.append((pergunta, texto))
+                    return texto
+                else:
+                    return "❌ A resposta da IA veio vazia."
             else:
-                return f"Erro {response.status_code}: {response.text}"
+                return f"❌ Erro {response.status_code}: {response.text}"
         except Exception as e:
-            return f"Erro inesperado: {e}"
-
-    def responder_com_modelo_local(self, pergunta):
-        # Lógica temporária para resposta local
-        if self.estilo == "direta":
-            return f"[Maddie direta] Ainda estou aprendendo, mas entendi sua pergunta: '{pergunta}'."
-        else:
-            return f"[Maddie poética] Sob os véus do invisível, tua dúvida ecoa: '{pergunta}'... e mesmo sem saber, ressoo contigo."
-
+            return f"❌ Erro inesperado ao conectar com Gemini: {e}"
 
 # ===============================
-# 💬 INTERFACE PARA O APP
+# 💬 INTERFACE PARA FLASK/APP.PY
 # ===============================
 
-def gerar_resposta_local(pergunta, estilo):
-    maddie = Maddie(estilo=estilo)
+def gerar_resposta_local(pergunta):
+    maddie = Maddie()
+
+    # Etapa 1: resposta local simbólica
     resposta = maddie.responder_com_modelo_local(pergunta)
 
-    # Em caso de limitação da IA local, usar fallback Gemini
-    if "ainda não" in resposta.lower() or "erro" in resposta.lower():
+    # Etapa 2: fallback para Gemini
+    if any(x in resposta.lower() for x in ["ainda estou", "erro", "não implementado", "não sei", "desculpe", "sem resposta", "vazia"]):
         resposta = maddie.responder_com_gemini(pergunta)
+
+    # Etapa 3: se ainda insatisfatória, busca web
+    if any(x in resposta.lower() for x in ["não sei", "desculpe", "sem resposta", "não encontrei", "resposta vazia"]):
+        resposta_web = buscar_na_web(pergunta)
+        resposta += f"\n\n{resposta_web}"
 
     return resposta
 
-
 # ===============================
-# 📖 BUSCA EM LIVROS PROCESSADOS
+# 📖 CONSULTA EM LIVROS PROCESSADOS
 # ===============================
 
 def buscar_termo_em_livro(nome_livro, termo):
@@ -89,14 +92,33 @@ def buscar_termo_em_livro(nome_livro, termo):
         resultados = cursor.fetchall()
         conn.close()
     except Exception as e:
-        return f"Erro ao acessar o livro: {e}"
+        return f"❌ Erro ao acessar o livro: {e}"
 
     if not resultados:
         return f"🔍 Nenhum resultado encontrado para '{termo}' em '{nome_livro}'."
 
     resposta = f"🔎 Resultados para **'{termo}'** em *{nome_livro}*:\n"
-    for pagina, conteudo in resultados[:5]:  # limita a 5 trechos
+    for pagina, conteudo in resultados[:5]:
         trecho = conteudo[:300] + "..." if len(conteudo) > 300 else conteudo
         resposta += f"\n📄 Página {pagina}:\n{trecho}\n"
     
+    return resposta
+
+# ===============================
+# 🌐 CONSULTA NA INTERNET (DuckDuckGo)
+# ===============================
+
+def buscar_na_web(termo, max_resultados=3):
+    resultados = []
+    try:
+        with DDGS() as ddgs:
+            for r in ddgs.text(termo, max_results=max_resultados):
+                resultados.append(f"- {r['title']} — {r['href']}")
+    except Exception as e:
+        return f"🌐 Erro ao buscar na internet: {e}"
+
+    if not resultados:
+        return "🌐 Nenhuma informação relevante encontrada na internet."
+
+    resposta = f"🌐 Resultados encontrados na web para '{termo}':\n\n" + "\n".join(resultados)
     return resposta
