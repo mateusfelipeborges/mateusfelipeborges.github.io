@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+  <h2>Comunidades</h2>
+  <ul>
+    {% for comunidade in comunidades %}
+      <li>
+        <a href="{{ url_for('comunidade', comunidade_id=comunidade.id) }}">{{ comunidade.nome }}</a>
+        <p>{{ comunidade.descricao }}</p>
+      </li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}

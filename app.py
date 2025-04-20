@@ -6,6 +6,7 @@ import os
 import requests
 import csv
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_socketio import SocketIO, emit
 
 # 🌿 Integrações internas
 from maddie_core import gerar_resposta_local, buscar_termo_em_livro
@@ -27,6 +28,9 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 db = SQLAlchemy(app)
+
+# Configuração do SocketIO
+socketio = SocketIO(app)
 
 # ===============================
 # 📦 MODELOS DO BANCO DE DADOS
@@ -72,6 +76,38 @@ class Usuario(db.Model):
     admin = db.Column(db.Boolean, default=False)  # Novo campo para verificar se é administrador
     data_registro = db.Column(db.DateTime, default=datetime.utcnow)
 
+# Modelos para o Fórum
+class Comunidade(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    nome = db.Column(db.String(100))
+    descricao = db.Column(db.String(300))
+    data_criacao = db.Column(db.DateTime, default=datetime.utcnow)
+    participantes = db.relationship('Usuario', secondary='participante')
+
+class Topico(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    titulo = db.Column(db.String(200))
+    conteudo = db.Column(db.Text)
+    comunidade_id = db.Column(db.Integer, db.ForeignKey('comunidade.id'))
+    comunidade = db.relationship('Comunidade', backref=db.backref('topicos', lazy=True))
+    data_criacao = db.Column(db.DateTime, default=datetime.utcnow)
+
+class Mensagem(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    usuario_id = db.Column(db.Integer, db.ForeignKey('usuario.id'))
+    usuario = db.relationship('Usuario', backref=db.backref('mensagens', lazy=True))
+    topico_id = db.Column(db.Integer, db.ForeignKey('topico.id'))
+    topico = db.relationship('Topico', backref=db.backref('mensagens', lazy=True))
+    conteudo = db.Column(db.Text)
+    data_hora = db.Column(db.DateTime, default=datetime.utcnow)
+
+class Participante(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    usuario_id = db.Column(db.Integer, db.ForeignKey('usuario.id'))
+    usuario = db.relationship('Usuario', backref=db.backref('comunidades_participante', lazy=True))
+    comunidade_id = db.Column(db.Integer, db.ForeignKey('comunidade.id'))
+    comunidade = db.relationship('Comunidade', backref=db.backref('membros', lazy=True))
+
 # ===============================
 # 🛠 FUNÇÕES AUXILIARES
 # ===============================
@@ -106,6 +142,38 @@ def criar_banco():
 def home():
     registrar_visita(request, '/')
     return render_template('index.html')
+
+@app.route('/comunidades')
+def comunidades():
+    registrar_visita(request, '/comunidades')
+    comunidades = Comunidade.query.all()
+    return render_template('comunidades.html', comunidades=comunidades)
+
+@app.route('/comunidade/<int:comunidade_id>')
+def comunidade(comunidade_id):
+    registrar_visita(request, '/comunidade')
+    comunidade = Comunidade.query.get_or_404(comunidade_id)
+    return render_template('comunidade.html', comunidade=comunidade)
+
+@app.route('/comunidade/<int:comunidade_id>/topico/<int:topico_id>', methods=['GET', 'POST'])
+def topico(comunidade_id, topico_id):
+    registrar_visita(request, '/comunidade/<int:comunidade_id>/topico')
+    topico = Topico.query.get_or_404(topico_id)
+    if request.method == 'POST':
+        mensagem = request.form.get('mensagem')
+        if mensagem:
+            nova_mensagem = Mensagem(usuario_id=session['usuario_id'], topico_id=topico_id, conteudo=mensagem)
+            db.session.add(nova_mensagem)
+            db.session.commit()
+            emit('nova_mensagem', {'mensagem': mensagem}, room=topico_id)
+    return render_template('topico.html', topico=topico)
+
+# Rota de Chat Online
+@app.route('/chat/<int:topico_id>', methods=['GET', 'POST'])
+def chat_online(topico_id):
+    registrar_visita(request, '/chat')
+    topico = Topico.query.get_or_404(topico_id)
+    return render_template('chat.html', topico=topico)
 
 @app.route('/livros')
 def listar_livros():
@@ -259,4 +327,4 @@ def relatorio_csv():
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
     print(f"Iniciando servidor Flask na porta {port}...")
-    app.run(debug=True, host='0.0.0.0', port=port)
+    socketio.run(app, debug=True, host='0.0.0.0', port=port)

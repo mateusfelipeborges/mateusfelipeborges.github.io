@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+  <h2>Chat: {{ topico.titulo }}</h2>
+  <div id="chat-messages">
+    {% for mensagem in topico.mensagens %}
+      <p><strong>{{ mensagem.usuario.nome_completo }}:</strong> {{ mensagem.conteudo }}</p>
+    {% endfor %}
+  </div>
+
+  <form id="chat-form">
+    <textarea id="message-input" placeholder="Digite sua mensagem..." required></textarea>
+    <button type="submit">Enviar</button>
+  </form>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.min.js"></script>
+<script>
+  var socket = io.connect('http://' + document.domain + ':' + location.port);
+  var topico_id = {{ topico.id }};
+
+  // Recebe nova mensagem em tempo real
+  socket.on('nova_mensagem', function(data) {
+    var messagesContainer = document.getElementById('chat-messages');
+    var newMessage = document.createElement('p');
+    newMessage.innerHTML = `<strong>${data.usuario}</strong>: ${data.mensagem}`;
+    messagesContainer.appendChild(newMessage);
+  });
+
+  // Envia mensagem no chat
+  document.getElementById('chat-form').onsubmit = function(event) {
+    event.preventDefault();
+    var messageContent = document.getElementById('message-input').value;
+
+    socket.emit('enviar_mensagem', {
+      topico_id: topico_id,
+      mensagem: messageContent
+    });
+    document.getElementById('message-input').value = '';  // Limpa o campo de input
+  };
+</script>
+{% endblock %}
