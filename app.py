@@ -24,9 +24,7 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 db = SQLAlchemy(app)
-socketio = SocketIO(app)
-
-# Modelos do banco mantidos como estão
+socketio = SocketIO(app, async_mode='threading')
 
 class Visitante(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -97,8 +95,6 @@ class Participante(db.Model):
     usuario_id = db.Column(db.Integer, db.ForeignKey('usuario.id'))
     comunidade_id = db.Column(db.Integer, db.ForeignKey('comunidade.id'))
 
-# Função auxiliar
-
 def registrar_visita(request, rota):
     ip = request.remote_addr or '0.0.0.0'
     user_agent = request.headers.get('User-Agent', 'Desconhecido')
@@ -117,7 +113,60 @@ def home():
     registrar_visita(request, '/')
     return render_template('index.html')
 
-# (Demais rotas mantidas como no seu último código, não exibidas por brevidade)
+@app.route('/blog')
+def blog():
+    registrar_visita(request, '/blog')
+    posts = Postagem.query.order_by(Postagem.data_publicacao.desc()).all()
+    return render_template('blog.html', posts=posts)
+
+@app.route('/comunidades')
+def comunidades():
+    registrar_visita(request, '/comunidades')
+    comunidades = Comunidade.query.all()
+    return render_template('comunidades.html', comunidades=comunidades)
+
+@app.route('/comunidade/<int:comunidade_id>')
+def comunidade(comunidade_id):
+    registrar_visita(request, f'/comunidade/{comunidade_id}')
+    comunidade = Comunidade.query.get_or_404(comunidade_id)
+    return render_template('comunidade.html', comunidade=comunidade)
+
+@app.route('/comunidade/<int:comunidade_id>/topico/<int:topico_id>', methods=['GET', 'POST'])
+def topico(comunidade_id, topico_id):
+    registrar_visita(request, f'/comunidade/{comunidade_id}/topico/{topico_id}')
+    topico = Topico.query.get_or_404(topico_id)
+    if request.method == 'POST':
+        mensagem = request.form.get('mensagem')
+        if mensagem:
+            nova_mensagem = Mensagem(usuario_id=session['usuario_id'], topico_id=topico_id, conteudo=mensagem)
+            db.session.add(nova_mensagem)
+            db.session.commit()
+            emit('nova_mensagem', {'mensagem': mensagem}, room=topico_id)
+    return render_template('topico.html', topico=topico)
+
+@app.route('/maddie', methods=['GET', 'POST'])
+def maddie():
+    registrar_visita(request, '/maddie')
+    resposta = ""
+    historico = InteracaoMaddie.query.filter_by(ip=request.remote_addr).order_by(
+        InteracaoMaddie.data_hora.desc()).limit(10).all()
+
+    if request.method == 'POST':
+        if 'apagar_historico' in request.form:
+            InteracaoMaddie.query.filter_by(ip=request.remote_addr).delete()
+            db.session.commit()
+            return redirect(url_for('maddie'))
+
+        pergunta = request.form.get('pergunta', '').strip()
+        if pergunta:
+            resposta = gerar_resposta_local(pergunta)
+            nova_interacao = InteracaoMaddie(ip=request.remote_addr, pergunta=pergunta, resposta=resposta)
+            db.session.add(nova_interacao)
+            db.session.commit()
+            historico = InteracaoMaddie.query.filter_by(ip=request.remote_addr).order_by(
+                InteracaoMaddie.data_hora.desc()).limit(10).all()
+
+    return render_template('maddie.html', resposta=resposta, historico=historico)
 
 if __name__ == '__main__':
     socketio.run(app, debug=True, host='0.0.0.0', port=int(os.environ.get("PORT", 5000)), allow_unsafe_werkzeug=True)
