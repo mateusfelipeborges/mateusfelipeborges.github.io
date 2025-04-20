@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+  .blog-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: #1e1b2f;
+    border-radius: 12px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+    color: #f0edf5;
+  }
+  .blog-post {
+    border-bottom: 1px solid #3c364f;
+    padding: 1rem 0;
+  }
+  .blog-post h2 {
+    margin: 0;
+    font-size: 1.6rem;
+    color: #cabcf2;
+  }
+  .blog-post p {
+    margin: 0.5rem 0 0;
+    font-size: 1.05rem;
+    color: #c8c4d8;
+  }
+  .blog-post small {
+    color: #9e95b8;
+    font-size: 0.85rem;
+  }
+  .escrever-link {
+    display: inline-block;
+    margin-top: 2rem;
+    padding: 0.7rem 1.4rem;
+    background: #7568b5;
+    color: #f0edf5;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: background 0.3s;
+  }
+  .escrever-link:hover {
+    background: #62589d;
+  }
+</style>
+
+<div class="blog-container">
+  <h1 style="font-weight: normal; font-size: 2rem; color: #e0daf6;">🌐 Reflexões de Madra Mada</h1>
+  {% for post in posts %}
+    <div class="blog-post">
+      <h2>{{ post.titulo }}</h2>
+      <small>Publicado em {{ post.data_publicacao.strftime('%d/%m/%Y %H:%M') }}</small>
+      <p>{{ post.conteudo[:300] }}...</p>
+    </div>
+  {% else %}
+    <p style="color: #a39db8;">Nenhuma reflexão escrita ainda.</p>
+  {% endfor %}
+
+  <a class="escrever-link" href="/escrever">Escrever nova reflexão</a>
+</div>
+{% endblock %}

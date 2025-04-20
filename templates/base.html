@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>{% block title %}Madra Mada{% endblock %}</title>
+  <style>
+    body {
+      background-color: #1a1029;
+      color: #f0e6ff;
+      font-family: 'Georgia', serif;
+      margin: 0;
+      padding: 2rem;
+    }
+    header, footer {
+      text-align: center;
+      padding: 1rem;
+    }
+    main {
+      max-width: 800px;
+      margin: auto;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Madra Mada</h1>
+    <p>Explorações, reflexões e palavras vivas.</p>
+  </header>
+
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer>
+    <p>&copy; 2025 · Madra Mada</p>
+  </footer>
+</body>
+</html>

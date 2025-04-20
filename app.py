@@ -20,6 +20,7 @@ app = Flask(__name__, static_folder='static', template_folder='templates')
 basedir = os.path.abspath(os.path.dirname(__file__))
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'madra.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
 db = SQLAlchemy(app)
 
 # ===============================
@@ -46,6 +47,12 @@ class InteracaoMaddie(db.Model):
     pergunta = db.Column(db.Text)
     resposta = db.Column(db.Text)
     data_hora = db.Column(db.DateTime, default=datetime.utcnow)
+
+class Postagem(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    titulo = db.Column(db.String(200))
+    conteudo = db.Column(db.Text)
+    data_publicacao = db.Column(db.DateTime, default=datetime.utcnow)
 
 # ===============================
 # 🛠 FUNÇÕES AUXILIARES
@@ -85,11 +92,7 @@ def home():
 @app.route('/livros')
 def listar_livros():
     registrar_visita(request, '/livros')
-    livros = []
-    for arquivo in os.listdir("bases_teoricas"):
-        if arquivo.endswith(".db"):
-            nome = arquivo.replace(".db", "")
-            livros.append(nome)
+    livros = [arquivo.replace(".db", "") for arquivo in os.listdir("bases_teoricas") if arquivo.endswith(".db")]
     return render_template("livros.html", livros=livros)
 
 @app.route('/livro')
@@ -99,7 +102,6 @@ def consultar_livro():
     termo = request.args.get("termo")
     if not nome or not termo:
         return "Uso correto: /livro?nome=kozen&termo=autômato"
-
     resultado = buscar_termo_em_livro(nome, termo)
     return f"<pre>{resultado}</pre>"
 
@@ -120,19 +122,32 @@ def maddie():
 
         if pergunta:
             resposta = gerar_resposta_local(pergunta)
-
-            nova_interacao = InteracaoMaddie(
-                ip=request.remote_addr,
-                pergunta=pergunta,
-                resposta=resposta
-            )
+            nova_interacao = InteracaoMaddie(ip=request.remote_addr, pergunta=pergunta, resposta=resposta)
             db.session.add(nova_interacao)
             db.session.commit()
-
             historico = InteracaoMaddie.query.filter_by(ip=request.remote_addr).order_by(
                 InteracaoMaddie.data_hora.desc()).limit(10).all()
 
     return render_template('maddie.html', resposta=resposta, historico=historico)
+
+@app.route('/blog')
+def blog():
+    registrar_visita(request, '/blog')
+    posts = Postagem.query.order_by(Postagem.data_publicacao.desc()).all()
+    return render_template('blog.html', posts=posts)
+
+@app.route('/escrever', methods=['GET', 'POST'])
+def escrever():
+    registrar_visita(request, '/escrever')
+    if request.method == 'POST':
+        titulo = request.form.get('titulo', '').strip()
+        conteudo = request.form.get('conteudo', '').strip()
+        if titulo and conteudo:
+            nova_postagem = Postagem(titulo=titulo, conteudo=conteudo)
+            db.session.add(nova_postagem)
+            db.session.commit()
+            return redirect(url_for('blog'))
+    return render_template('escrever.html')
 
 @app.route('/acessos')
 def acessos():

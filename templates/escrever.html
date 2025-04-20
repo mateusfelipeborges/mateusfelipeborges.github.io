@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+  .editor-container {
+    max-width: 700px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: #1e1b2f;
+    border-radius: 12px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+    color: #f0edf5;
+  }
+  .editor-container h1 {
+    color: #e0daf6;
+    font-weight: normal;
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+  }
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  input[type="text"], textarea {
+    padding: 0.8rem;
+    font-size: 1rem;
+    border: none;
+    border-radius: 8px;
+    background: #2e2c3f;
+    color: #f0f0f0;
+  }
+  textarea {
+    resize: vertical;
+    min-height: 200px;
+  }
+  button {
+    background-color: #7568b5;
+    color: white;
+    padding: 0.8rem;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  button:hover {
+    background-color: #62589d;
+  }
+</style>
+
+<div class="editor-container">
+  <h1>✍️ Escrever nova reflexão</h1>
+  <form method="POST">
+    <input type="text" name="titulo" placeholder="Título da reflexão" required>
+    <textarea name="conteudo" placeholder="Escreva aqui sua mensagem introspectiva..." required></textarea>
+    <button type="submit">Publicar</button>
+  </form>
+</div>
+{% endblock %}
