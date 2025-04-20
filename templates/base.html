@@ -2,7 +2,30 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Madra Mada é um espaço de reflexões, poesias e experiências espirituais. Um santuário digital para a mente e a alma.">
+  <meta name="keywords" content="Madra Mada, espiritualidade, poesia, introspecção, blog, reflexões, filosofia, autoconhecimento, tarô, magia">
+  <meta name="author" content="Mateus Felipe Borges">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Madra Mada">
+  <meta property="og:description" content="Explorações, reflexões e palavras vivas. Um blog pessoal de alma e profundidade.">
+  <meta property="og:image" content="{{ url_for('static', filename='img/madra-og.jpg') }}">
+  <meta property="og:url" content="{{ request.url }}">
+  <meta property="og:type" content="website">
+
+  <!-- Google Analytics -->
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-T7HDBYGX1W"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-T7HDBYGX1W');
+  </script>
+
   <title>{% block title %}Madra Mada{% endblock %}</title>
+
   <style>
     body {
       background-color: #1a1029;
@@ -15,17 +38,65 @@
       text-align: center;
       padding: 1rem;
     }
+    nav {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    nav a {
+      color: #d6c4f0;
+      text-decoration: none;
+      margin: 0 1rem;
+      font-weight: bold;
+    }
+    nav a:hover {
+      color: #ffffff;
+      text-decoration: underline;
+    }
     main {
       max-width: 800px;
       margin: auto;
+    }
+    .boas-vindas {
+      margin-top: 0.7rem;
+      font-size: 0.95rem;
+      color: #cbb5ef;
+    }
+    .boas-vindas a {
+      color: #e4d2ff;
+      font-weight: bold;
+      text-decoration: none;
+      margin: 0 0.5rem;
+    }
+    .boas-vindas a:hover {
+      color: #ffffff;
+      text-decoration: underline;
     }
   </style>
 </head>
 <body>
   <header>
-    <h1>Madra Mada</h1>
-    <p>Explorações, reflexões e palavras vivas.</p>
+    <h1 style="font-weight: bold; font-size: 2.2rem; color: #e5d6ff;">Madra Mada</h1>
+    <p style="margin: 0.5rem 0 1rem; font-size: 1.05rem; color: #d3c2ee;">Explorações, reflexões e palavras vivas.</p>
+
+    {% if session.usuario_nome %}
+      <div class="boas-vindas">
+        Olá, {{ session.usuario_nome }} · <a href="{{ url_for('logout') }}">Sair</a>
+      </div>
+    {% else %}
+      <div class="boas-vindas">
+        <a href="{{ url_for('login') }}">Entrar</a> · <a href="{{ url_for('cadastro') }}">Cadastrar-se</a>
+      </div>
+    {% endif %}
   </header>
+
+  <nav>
+    <a href="{{ url_for('home') }}">Início</a>
+    <a href="{{ url_for('blog') }}">Blog</a>
+    <a href="{{ url_for('maddie') }}">Maddie</a>
+    {% if session.usuario_id %}
+      <a href="{{ url_for('escrever') }}">✍️ Escrever</a>
+    {% endif %}
+  </nav>
 
   <main>
     {% block content %}{% endblock %}
