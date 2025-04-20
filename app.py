@@ -79,9 +79,9 @@ def livro():
     registrar_visita(request, '/livro')
     return render_template('eassimchoveu.html')
 
-# Página da Maddie com integração à API Gemini
+# Integração com Gemini
 def gerar_resposta_gemini(pergunta):
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key={gemini_api_key}"
+    url = f"https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key={gemini_api_key}"
     headers = {
         "Content-Type": "application/json"
     }
@@ -89,7 +89,8 @@ def gerar_resposta_gemini(pergunta):
         "contents": [
             {
                 "parts": [
-                    {"text": f"{pergunta}"}
+                    {"text": "Você é Maddie, uma entidade mística, inteligente e profunda. Responda de forma simbólica e poética."},
+                    {"text": pergunta}
                 ]
             }
         ]
@@ -104,6 +105,7 @@ def gerar_resposta_gemini(pergunta):
     except Exception as e:
         return f"Erro inesperado: {e}"
 
+# Página da Maddie
 @app.route('/maddie', methods=['GET', 'POST'])
 def maddie():
     registrar_visita(request, '/maddie')
@@ -113,7 +115,7 @@ def maddie():
         resposta = gerar_resposta_gemini(pergunta)
     return render_template('maddie.html', resposta=resposta)
 
-# Rota para registrar visitante (teste)
+# Rota para registrar visitante
 @app.route('/registrar')
 def registrar():
     registrar_visita(request, '/registrar')
@@ -122,7 +124,7 @@ def registrar():
     db.session.commit()
     return "Visitante registrado!"
 
-# Rota para listar visitantes com HTML estilizado
+# Rota para listar visitantes
 @app.route('/visitantes')
 def visitantes():
     registrar_visita(request, '/visitantes')
@@ -156,7 +158,7 @@ def relatorio_csv():
 
     return send_file(caminho_arquivo, as_attachment=True)
 
-# Inicia o servidor (Render fix)
+# Inicia o servidor
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
     print(f"Iniciando servidor Flask na porta {port}...")
