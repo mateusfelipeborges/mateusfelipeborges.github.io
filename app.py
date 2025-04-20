@@ -69,6 +69,7 @@ class Usuario(db.Model):
     nome_artistico = db.Column(db.String(150))
     email = db.Column(db.String(150), unique=True, nullable=False)
     senha = db.Column(db.String(100), nullable=False)
+    admin = db.Column(db.Boolean, default=False)  # Novo campo para verificar se é administrador
     data_registro = db.Column(db.DateTime, default=datetime.utcnow)
 
 # ===============================
@@ -213,12 +214,17 @@ def login():
         email = request.form.get('email', '').strip()
         senha = request.form.get('senha', '').strip()
 
-        usuario = Usuario.query.filter_by(email=email).first()
-        if usuario and check_password_hash(usuario.senha, senha):
-            session['usuario_id'] = usuario.id
-            session['usuario_nome'] = usuario.nome_completo
-            return redirect(url_for('home'))
-        return "❌ Email ou senha inválidos."
+        try:
+            usuario = Usuario.query.filter_by(email=email).first()
+            if usuario and check_password_hash(usuario.senha, senha):
+                session['usuario_id'] = usuario.id
+                session['usuario_nome'] = usuario.nome_completo
+                session['is_admin'] = usuario.admin  # Adiciona a informação de admin na sessão
+                return redirect(url_for('home'))
+            return render_template('login.html', error="❌ Email ou senha inválidos.")
+        except Exception as e:
+            print(f"Erro ao processar o login: {e}")
+            return render_template('login.html', error="⚠️ Ocorreu um erro durante o login. Tente novamente mais tarde.")
 
     return render_template('login.html')
 
@@ -253,4 +259,4 @@ def relatorio_csv():
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
     print(f"Iniciando servidor Flask na porta {port}...")
-    app.run(debug=False, host='0.0.0.0', port=port)
+    app.run(debug=True, host='0.0.0.0', port=port)
