@@ -8,7 +8,7 @@ import csv
 
 # Carrega variáveis do .env
 load_dotenv()
-openrouter_api_key = os.getenv("OPENROUTER_API_KEY")
+gemini_api_key = os.getenv("GEMINI_API_KEY")
 
 # Flask App
 app = Flask(__name__, static_folder='static', template_folder='templates')
@@ -79,53 +79,38 @@ def livro():
     registrar_visita(request, '/livro')
     return render_template('eassimchoveu.html')
 
-# Página da Maddie com integração à OpenRouter
+# Página da Maddie com integração à API Gemini
+def gerar_resposta_gemini(pergunta):
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key={gemini_api_key}"
+    headers = {
+        "Content-Type": "application/json"
+    }
+    data = {
+        "contents": [
+            {
+                "parts": [
+                    {"text": f"{pergunta}"}
+                ]
+            }
+        ]
+    }
+    try:
+        response = requests.post(url, headers=headers, json=data)
+        if response.status_code == 200:
+            resultado = response.json()
+            return resultado['candidates'][0]['content']['parts'][0]['text']
+        else:
+            return f"Erro {response.status_code}: {response.text}"
+    except Exception as e:
+        return f"Erro inesperado: {e}"
+
 @app.route('/maddie', methods=['GET', 'POST'])
 def maddie():
     registrar_visita(request, '/maddie')
     resposta = ""
     if request.method == 'POST':
         pergunta = request.form['pergunta']
-        try:
-            url = "https://openrouter.ai/api/v1/chat/completions"
-            headers = {
-                "Authorization": f"Bearer {openrouter_api_key}",
-                "Content-Type": "application/json",
-                "HTTP-Referer": "https://www.mateusfelipeborges.com",  # ou domínio que estiver usando
-                "X-Title": "Maddie"
-            }
-            data = {
-                "model": "openai/gpt-3.5-turbo",  # ou outro modelo disponível
-                "messages": [
-                    {"role": "system", "content": "Você é uma entidade chamada Maddie. Um ser inteligente, místico e racional. Suas respostas são poéticas, simbólicas e profundas."},
-                    {"role": "user", "content": pergunta}
-                ]
-            }
-
-            # DEBUG
-            print("🔑 API Key:", openrouter_api_key)
-            print("🌍 URL:", url)
-            print("🧾 Headers:", headers)
-            print("📤 Payload:", data)
-
-            response = requests.post(url, headers=headers, json=data)
-
-            print("📬 Status Code:", response.status_code)
-            print("📨 Response Text:", response.text)
-
-            if response.status_code == 200:
-                result = response.json()
-                if 'choices' in result and len(result['choices']) > 0:
-                    resposta = result['choices'][0]['message']['content']
-                else:
-                    resposta = "Desculpe, não consegui entender a sua pergunta."
-            else:
-                resposta = "Erro ao acessar a API, tente novamente mais tarde."
-        except requests.exceptions.RequestException as e:
-            resposta = f"Erro de requisição: {e}"
-        except Exception as e:
-            resposta = f"Ocorreu um erro inesperado: {e}"
-
+        resposta = gerar_resposta_gemini(pergunta)
     return render_template('maddie.html', resposta=resposta)
 
 # Rota para registrar visitante (teste)
