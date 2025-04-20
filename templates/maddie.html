@@ -91,6 +91,22 @@
       word-break: break-word;
     }
 
+    .historico {
+      margin-top: 2rem;
+      max-width: 700px;
+    }
+
+    .historico-item {
+      background-color: #1c1c2e;
+      margin-bottom: 1rem;
+      padding: 1rem;
+      border-radius: 10px;
+    }
+
+    .historico-item strong {
+      color: #cba8ff;
+    }
+
     @media (max-width: 600px) {
       body {
         padding: 1rem;
@@ -122,6 +138,18 @@
   {% if resposta %}
     <h2>Resposta da Maddie:</h2>
     <p>{{ resposta }}</p>
+  {% endif %}
+
+  {% if historico %}
+    <div class="historico">
+      <h2>✨ Suas perguntas anteriores:</h2>
+      {% for item in historico %}
+        <div class="historico-item">
+          <strong>Pergunta:</strong> {{ item.pergunta }}<br>
+          <strong>Resposta:</strong> {{ item.resposta }}
+        </div>
+      {% endfor %}
+    </div>
   {% endif %}
 </body>
 </html>
