@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Histórico de Consultas – Maddie</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 2rem;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #1b1b2b, #2a2a3f);
+      color: #f2f2f2;
+    }
+
+    h1 {
+      text-align: center;
+      color: #cba8ff;
+      font-size: 2.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .interacao {
+      background-color: #24243a;
+      border-radius: 10px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .interacao h2 {
+      font-size: 1rem;
+      color: #ffd8ff;
+      margin-bottom: 0.5rem;
+    }
+
+    .pergunta {
+      font-weight: bold;
+      color: #a08eff;
+    }
+
+    .resposta {
+      margin-top: 0.5rem;
+      color: #eaeaea;
+      white-space: pre-wrap;
+    }
+
+    .data {
+      margin-top: 0.8rem;
+      font-size: 0.8rem;
+      color: #aaa;
+      text-align: right;
+    }
+
+    a {
+      display: inline-block;
+      margin-top: 1rem;
+      text-align: center;
+      color: #cba8ff;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <h1>🌙 Histórico de Consultas à Maddie</h1>
+
+  {% for interacao in historico %}
+    <div class="interacao">
+      <h2>Pergunta:</h2>
+      <p class="pergunta">{{ interacao.pergunta }}</p>
+      <h2>Resposta da Maddie:</h2>
+      <p class="resposta">{{ interacao.resposta }}</p>
+      <p class="data">🕰️ {{ interacao.data_hora.strftime('%d/%m/%Y %H:%M:%S') }}</p>
+    </div>
+  {% endfor %}
+
+  <a href="/">← Voltar ao início</a>
+</body>
+</html>

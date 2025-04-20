@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>O Livro - Madra Mada</title>
   <style>
     body {
@@ -100,6 +100,10 @@
       color: #fff;
     }
 
+    #popup-content input::placeholder {
+      color: #ccc;
+    }
+
     #popup-content button {
       padding: 0.5rem;
       background: #925eff;
@@ -129,7 +133,7 @@
     </p>
   </header>
 
-  <img src="img/livro-capa.jpg" alt="Capa do Livro" class="capa">
+  <img src="img/livro-capa.jpg" alt="Capa do Livro" class="capa" />
 
   <a href="#" class="botao">Adquirir agora</a>
 
@@ -141,9 +145,9 @@
   <div id="maddie-popup">
     <button id="abrir-popup">🜃</button>
     <div id="popup-content">
-      <h3>Oráculo da Maddie</h3>
+      <h3>Pergunte à Maddie</h3>
       <form method="POST" action="/maddie">
-        <input type="text" name="pergunta" placeholder="Digite sua pergunta" required>
+        <input type="text" name="pergunta" placeholder="Digite sua pergunta" required autocomplete="off" />
         <button type="submit">Perguntar</button>
       </form>
     </div>

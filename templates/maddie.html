@@ -1,203 +1,70 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Maddie – Oráculo Digital</title>
-  <style>
-    * {
-      box-sizing: border-box;
+<<!-- Pop-up de conversa com Maddie -->
+<div id="maddie-popup" class="popup">
+  <button id="toggle-popup" class="popup-button">🔮 Pergunte à Maddie</button>
+  <div id="maddie-popup-content" class="popup-content">
+    <iframe src="/maddie" frameborder="0" class="popup-frame" title="Perguntas para Maddie"></iframe>
+  </div>
+</div>
+
+<style>
+  .popup {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+  }
+
+  .popup-button {
+    background-color: #925eff;
+    color: white;
+    border: none;
+    padding: 0.7rem 1.2rem;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+
+  .popup-button:hover {
+    background-color: #7a4ae6;
+  }
+
+  .popup-content {
+    display: none;
+    margin-top: 10px;
+    border: 2px solid #925eff;
+    border-radius: 12px;
+    overflow: hidden;
+    width: 400px;
+    height: 500px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+    background-color: #1c1c2e;
+  }
+
+  .popup-frame {
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
+
+  @media (max-width: 600px) {
+    .popup-content {
+      width: 90vw;
+      height: 70vh;
     }
+  }
+</style>
 
-    body {
-      margin: 0;
-      padding: 2rem;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #1b1b2b, #2a2a3f);
-      color: #f2f2f2;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      min-height: 100vh;
-    }
+<script>
+  const toggleButton = document.getElementById('toggle-popup');
+  const popupContent = document.getElementById('maddie-popup-content');
 
-    h1 {
-      font-size: 2.5rem;
-      margin-bottom: 1rem;
-      color: #cba8ff;
-      font-weight: 600;
-      text-align: center;
-    }
-
-    form {
-      background-color: #24243a;
-      padding: 2rem;
-      border-radius: 12px;
-      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
-      max-width: 600px;
-      width: 100%;
-      margin-bottom: 2rem;
-    }
-
-    label {
-      display: block;
-      margin-bottom: 0.6rem;
-      font-weight: bold;
-    }
-
-    input[type="text"],
-    select {
-      width: 100%;
-      padding: 0.8rem;
-      border: none;
-      border-radius: 8px;
-      margin-bottom: 1rem;
-      background-color: #1c1c2e;
-      color: #f0f0f0;
-    }
-
-    input[type="text"]::placeholder {
-      color: #aaa;
-    }
-
-    input[type="text"] {
-      autocomplete: off;
-    }
-
-    button {
-      background-color: #925eff;
-      border: none;
-      color: white;
-      padding: 0.8rem 1.5rem;
-      border-radius: 8px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-      width: 100%;
-      margin-top: 0.5rem;
-    }
-
-    button:hover {
-      background-color: #7a4ae6;
-    }
-
-    h2 {
-      margin-top: 2rem;
-      color: #ffd8ff;
-      font-size: 1.5rem;
-      text-align: center;
-    }
-
-    p {
-      background-color: #1c1c2e;
-      padding: 1rem;
-      border-radius: 10px;
-      max-width: 700px;
-      margin-top: 1rem;
-      white-space: pre-wrap;
-      word-break: break-word;
-    }
-
-    .historico {
-      margin-top: 2rem;
-      max-width: 700px;
-      width: 100%;
-    }
-
-    .historico h3 {
-      color: #9bd;
-      font-size: 1.2rem;
-      margin-bottom: 1rem;
-    }
-
-    .historico-item {
-      background-color: #2f2f44;
-      padding: 1rem;
-      border-radius: 10px;
-      margin-bottom: 1rem;
-    }
-
-    .historico-item strong {
-      display: block;
-      color: #ffc9ec;
-      margin-bottom: 0.5rem;
-    }
-
-    .apagar-container {
-      display: flex;
-      justify-content: center;
-      margin-top: 1rem;
-    }
-
-    .apagar-btn {
-      background-color: #e85555;
-      padding: 0.8rem 1.5rem;
-      border-radius: 8px;
-      font-weight: bold;
-      border: none;
-      cursor: pointer;
-      color: white;
-      transition: background-color 0.3s ease;
-    }
-
-    .apagar-btn:hover {
-      background-color: #d33;
-    }
-
-    @media (max-width: 600px) {
-      body {
-        padding: 1rem;
-      }
-
-      h1 {
-        font-size: 2rem;
-      }
-
-      h2 {
-        font-size: 1.2rem;
-      }
-    }
-  </style>
-</head>
-<body>
-  <h1>✨ Maddie ✨</h1>
-
-  <form method="POST">
-    <label for="pergunta">Envie sua pergunta:</label>
-    <input type="text" id="pergunta" name="pergunta" required placeholder="Digite aqui..." autocomplete="off">
-
-    <label for="estilo">Estilo da resposta:</label>
-    <select id="estilo" name="estilo">
-      <option value="poetica">Poética</option>
-      <option value="direta">Direta</option>
-    </select>
-
-    <button type="submit">Consultar</button>
-  </form>
-
-  {% if resposta %}
-    <h2>Resposta da Maddie:</h2>
-    <p>{{ resposta }}</p>
-  {% endif %}
-
-  {% if historico %}
-    <div class="historico">
-      <h3>Suas últimas perguntas:</h3>
-      {% for item in historico %}
-        <div class="historico-item">
-          <strong>Pergunta:</strong> {{ item.pergunta }}
-          <strong>Resposta:</strong> {{ item.resposta }}
-          <small><em>{{ item.estilo|capitalize }} — {{ item.data_hora.strftime('%d/%m/%Y %H:%M') }}</em></small>
-        </div>
-      {% endfor %}
-
-      <div class="apagar-container">
-        <form method="POST">
-          <input type="hidden" name="apagar_historico" value="1">
-          <button class="apagar-btn" type="submit">🗑️ Apagar histórico</button>
-        </form>
-      </div>
-    </div>
-  {% endif %}
-</body>
-</html>
+  toggleButton.addEventListener('click', () => {
+    const isOpen = popupContent.style.display === 'block';
+    popupContent.style.display = isOpen ? 'none' : 'block';
+  });
+</script>

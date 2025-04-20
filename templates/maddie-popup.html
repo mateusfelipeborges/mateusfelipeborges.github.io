@@ -1,8 +1,8 @@
-<!-- Pop-up da Maddie -->
+<!-- Pop-up de conversa com Maddie -->
 <div id="maddie-popup" class="popup">
-    <button id="toggle-popup" class="popup-button">🔮 Falar com Maddie</button>
-    <div class="popup-content">
-      <iframe src="/maddie" frameborder="0" class="popup-frame"></iframe>
+    <button id="toggle-popup" class="popup-button">🔮 Pergunte à Maddie</button>
+    <div id="popup-content" class="popup-content">
+      <iframe src="/maddie" frameborder="0" class="popup-frame" title="Perguntas para Maddie"></iframe>
     </div>
   </div>
   
@@ -61,10 +61,11 @@
   
   <script>
     const toggleButton = document.getElementById('toggle-popup');
-    const popupContent = document.querySelector('.popup-content');
+    const popupContent = document.getElementById('popup-content');
   
     toggleButton.addEventListener('click', () => {
-      popupContent.style.display = popupContent.style.display === 'block' ? 'none' : 'block';
+      const isOpen = popupContent.style.display === 'block';
+      popupContent.style.display = isOpen ? 'none' : 'block';
     });
   </script>
   
