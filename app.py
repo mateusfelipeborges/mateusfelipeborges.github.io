@@ -79,9 +79,9 @@ def livro():
     registrar_visita(request, '/livro')
     return render_template('eassimchoveu.html')
 
-# Integração com Gemini
+# Integração com Gemini (modelo correto)
 def gerar_resposta_gemini(pergunta):
-    url = f"https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key={gemini_api_key}"
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={gemini_api_key}"
     headers = {
         "Content-Type": "application/json"
     }
