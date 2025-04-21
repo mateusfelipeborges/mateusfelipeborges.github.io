@@ -301,10 +301,11 @@ def cadastro():
         db.session.commit()
 
         # Enviar notificação por e-mail
-        msg = Message(
-            subject='📝 Novo Cadastro no Madra Mada',
-            recipients=[os.getenv('MAIL_USERNAME')],
-            body=f'''
+       msg = Message(
+    subject='📝 Novo Cadastro no Madra Mada',
+    sender=os.getenv('MAIL_DEFAULT_SENDER'),  # 👈 ESSA LINHA AQUI
+    recipients=[os.getenv('MAIL_USERNAME')],
+    body=f'''
 📬 Novo usuário se cadastrou!
 
 Nome: {nome_completo}
@@ -315,6 +316,7 @@ Pronomes: {pronomes}
 Nome artístico: {nome_artistico}
 '''
 )
+
         mail.send(msg)
 
         return redirect(url_for('login'))
