@@ -321,10 +321,10 @@ mail.send(msg)
 return redirect(url_for('login'))
 
 
-    return render_template('cadastro.html')
+return render_template('cadastro.html')
 
 
-@app.route('/login', methods=['GET', 'POST'])
+@app.route('/login', methods=['GET', 'POST'])   
 def login():
     if request.method == 'POST':
         email = request.form.get('email', '').strip()
