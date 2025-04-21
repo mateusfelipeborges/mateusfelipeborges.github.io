@@ -318,10 +318,8 @@ Nome artístico: {nome_artistico}
 )
 mail.send(msg)
 
+return redirect(url_for('login'))
 
-
-
-        return redirect(url_for('login'))
 
     return render_template('cadastro.html')
 
