@@ -319,7 +319,7 @@ Nome artístico: {nome_artistico}
 mail.send(msg)
 
 
-        mail.send(msg)
+
 
         return redirect(url_for('login'))
 
