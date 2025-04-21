@@ -23,6 +23,7 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'madra.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+
 UPLOAD_FOLDER = os.path.join('static', 'uploads')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -162,12 +163,17 @@ def topico(comunidade_id, topico_id):
     if request.method == 'POST':
         mensagem = request.form.get('mensagem')
         if mensagem:
-            nova_mensagem = Mensagem(usuario_id=session['usuario_id'], topico_id=topico_id, conteudo=mensagem)
+            nova_mensagem = Mensagem(
+                usuario_id=session['usuario_id'],
+                topico_id=topico_id,
+                conteudo=mensagem
+            )
             db.session.add(nova_mensagem)
             db.session.commit()
             emit('nova_mensagem', {'mensagem': mensagem}, room=topico_id)
     return render_template('topico.html', topico=topico)
 
+ # Rota de Chat Online
 @app.route('/chat/<int:topico_id>', methods=['GET', 'POST'])
 def chat_online(topico_id):
     registrar_visita(request, '/chat')
@@ -206,7 +212,11 @@ def maddie():
         pergunta = request.form.get('pergunta', '').strip()
         if pergunta:
             resposta = gerar_resposta_local(pergunta)
-            nova_interacao = InteracaoMaddie(ip=request.remote_addr, pergunta=pergunta, resposta=resposta)
+            nova_interacao = InteracaoMaddie(
+                ip=request.remote_addr,
+                pergunta=pergunta,
+                resposta=resposta
+            )
             db.session.add(nova_interacao)
             db.session.commit()
             historico = InteracaoMaddie.query.filter_by(ip=request.remote_addr).order_by(
@@ -239,7 +249,11 @@ def escrever():
             imagem_arquivo.save(caminho)
 
         if titulo and conteudo:
-            nova_postagem = Postagem(titulo=titulo, conteudo=conteudo, imagem=nome_imagem)
+            nova_postagem = Postagem(
+                titulo=titulo,
+                conteudo=conteudo,
+                imagem=nome_imagem
+            )
             db.session.add(nova_postagem)
             db.session.commit()
             return redirect(url_for('blog'))
@@ -286,7 +300,7 @@ def login():
             if usuario and check_password_hash(usuario.senha, senha):
                 session['usuario_id'] = usuario.id
                 session['usuario_nome'] = usuario.nome_completo
-                session['is_admin'] = usuario.admin
+                session['is_admin'] = usuario.admin  # Adiciona a informação de admin na sessão
                 return redirect(url_for('home'))
             return render_template('login.html', error="❌ Email ou senha inválidos.")
         except Exception as e:
@@ -326,4 +340,4 @@ def relatorio_csv():
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
     print(f"Iniciando servidor Flask com SocketIO na porta {port}...")
-    socketio.run(app, debug=True, host='0.0.0.0', port=port)
+    socketio.run(app, debug=True, host='0.0.0.0', port=port, allow_unsafe_werkzeug=True)
