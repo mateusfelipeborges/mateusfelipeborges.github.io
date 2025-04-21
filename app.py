@@ -19,10 +19,20 @@ load_dotenv()
 app = Flask(__name__, static_folder='static', template_folder='templates')
 app.secret_key = os.getenv('SECRET_KEY', 'madra_secreta')
 
+# Configuração do Flask-Mail
+from flask_mail import Mail, Message
+app.config.update(
+    MAIL_SERVER='smtp.gmail.com',
+    MAIL_PORT=587,
+    MAIL_USE_TLS=True,
+    MAIL_USERNAME=os.getenv('MAIL_USERNAME'),
+    MAIL_PASSWORD=os.getenv('MAIL_PASSWORD')
+)
+mail = Mail(app)
+
 basedir = os.path.abspath(os.path.dirname(__file__))
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'madra.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
 
 UPLOAD_FOLDER = os.path.join('static', 'uploads')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -174,6 +184,7 @@ def topico(comunidade_id, topico_id):
     return render_template('topico.html', topico=topico)
 
  # Rota de Chat Online
+
 @app.route('/chat/<int:topico_id>', methods=['GET', 'POST'])
 def chat_online(topico_id):
     registrar_visita(request, '/chat')
@@ -260,6 +271,7 @@ def escrever():
 
     return render_template('escrever.html')
 
+
 @app.route('/cadastro', methods=['GET', 'POST'])
 def cadastro():
     if request.method == 'POST':
@@ -285,9 +297,28 @@ def cadastro():
         )
         db.session.add(nova_conta)
         db.session.commit()
+
+        # Enviar notificação por e-mail
+        msg = Message(
+            subject='📝 Novo Cadastro no Madra Mada',
+            recipients=[os.getenv('MAIL_USERNAME')],
+            body=f'''
+📬 Novo usuário se cadastrou!
+
+Nome: {nome_completo}
+Email: {email}
+Idade: {idade}
+Apelido: {apelido}
+Pronomes: {pronomes}
+Nome artístico: {nome_artistico}
+'''
+)
+        mail.send(msg)
+
         return redirect(url_for('login'))
 
     return render_template('cadastro.html')
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -308,6 +339,7 @@ def login():
             return render_template('login.html', error="⚠️ Ocorreu um erro durante o login. Tente novamente mais tarde.")
 
     return render_template('login.html')
+
 
 @app.route('/logout')
 def logout():
@@ -335,7 +367,7 @@ def relatorio_csv():
 
 # ===============================
 # 🚀 INÍCIO DO SERVIDOR
-# ===============================
+# ===============================@app.route('/cadastro', methods=['GET', 'POST'])
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
