@@ -301,11 +301,11 @@ def cadastro():
         db.session.commit()
 
         # Enviar notificação por e-mail
-msg = Message(
-    subject='📝 Novo Cadastro no Madra Mada',
-    sender=os.getenv('MAIL_DEFAULT_SENDER'),  # Isso evita o AssertionError
-    recipients=[os.getenv('MAIL_USERNAME')],
-    body=f'''
+        msg = Message(
+            subject='📝 Novo Cadastro no Madra Mada',
+            sender=os.getenv('MAIL_DEFAULT_SENDER'),  # Evita o AssertionError
+            recipients=[os.getenv('MAIL_USERNAME')],
+            body=f'''
 📬 Novo usuário se cadastrou!
 
 Nome: {nome_completo}
@@ -315,13 +315,13 @@ Apelido: {apelido}
 Pronomes: {pronomes}
 Nome artístico: {nome_artistico}
 '''
-)
-mail.send(msg)
+        )
+        mail.send(msg)
 
-return redirect(url_for('login'))
+        return redirect(url_for('login'))
 
-
-return render_template('cadastro.html')
+    # GET: mostra o formulário
+    return render_template('cadastro.html')
 
 
 @app.route('/login', methods=['GET', 'POST'])   
