@@ -1,101 +1,26 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <title>📖 Biblioteca Viva | Madra Mada</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <style>
-        body {
-            background: radial-gradient(circle at top, #2e1e3f 0%, #1a1029 100%);
-            color: #f0e6ff;
-            font-family: 'Georgia', serif;
-            margin: 0;
-            padding: 2em;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-        }
+<!-- livros.html -->
+{% extends 'base.html' %}
 
-        h1 {
-            font-size: 3em;
-            margin-bottom: 0.5em;
-            letter-spacing: 1.5px;
-            text-align: center;
-            text-shadow: 0 0 8px #bb9af7;
-        }
+{% block content %}
+<div class="container">
+  <h2>Biblioteca de Livros</h2>
 
-        p.descricao {
-            font-size: 1.2em;
-            max-width: 700px;
-            text-align: center;
-            opacity: 0.8;
-            margin-bottom: 2em;
-        }
-
-        ul {
-            list-style: none;
-            padding: 0;
-            width: 100%;
-            max-width: 600px;
-        }
-
-        li {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 1em;
-            margin-bottom: 1em;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(187, 154, 247, 0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        .nome-livro {
-            font-weight: bold;
-            font-size: 1.1em;
-            color: #e0caff;
-        }
-
-        a.link-busca {
-            background: #bb9af7;
-            color: #2e1e3f;
-            text-decoration: none;
-            padding: 0.5em 1em;
-            border-radius: 6px;
-            font-weight: bold;
-            transition: background 0.3s;
-        }
-
-        a.link-busca:hover {
-            background: #d4baff;
-        }
-
-        footer {
-            margin-top: auto;
-            padding: 2em;
-            font-size: 0.85em;
-            opacity: 0.6;
-            text-align: center;
-        }
-    </style>
-</head>
-<body>
-    <h1>📖 Biblioteca Viva</h1>
-    <p class="descricao">Esses são os livros sagrados já integrados ao oráculo Maddie. Clique para consultar um exemplo.</p>
-
+  {% if livros %}
     <ul>
-        {% for livro in livros %}
+      {% for livro in livros %}
         <li>
-            <span class="nome-livro">{{ livro }}</span>
-            <a href="/livro?nome={{ livro }}&termo=exemplo" class="link-busca">Buscar "exemplo"</a>
+          <strong>{{ livro.titulo }}</strong><br>
+          <em>{{ livro.autor }}</em><br>
+          {% if livro.link %}
+            <a href="{{ livro.link }}" target="_blank">Ler / Baixar</a>
+          {% endif %}
         </li>
-        {% endfor %}
+        <hr>
+      {% endfor %}
     </ul>
+  {% else %}
+    <p>Nenhum livro disponível no momento.</p>
+  {% endif %}
+</div>
+{% endblock %}
 
-    <footer>
-        &copy; {{ current_year or "2025" }} Madra Mada · Sabedoria viva através da linguagem
-    </footer>
-</body>
-</html>

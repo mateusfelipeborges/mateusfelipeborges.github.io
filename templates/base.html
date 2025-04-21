@@ -15,7 +15,6 @@
   <meta property="og:type" content="website">
 
   <!-- Google Analytics -->
-  <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-T7HDBYGX1W"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -80,11 +79,11 @@
 
     {% if session.usuario_nome %}
       <div class="boas-vindas">
-        Olá, {{ session.usuario_nome }} · <a href="{{ url_for('logout') }}">Sair</a>
+        Olá, {{ session.usuario_nome }} &middot; <a href="{{ url_for('logout') }}">Sair</a>
       </div>
     {% else %}
       <div class="boas-vindas">
-        <a href="{{ url_for('login') }}">Entrar</a> · <a href="{{ url_for('cadastro') }}">Cadastrar-se</a>
+        <a href="{{ url_for('login') }}">Entrar</a> &middot; <a href="{{ url_for('cadastro') }}">Cadastrar-se</a>
       </div>
     {% endif %}
   </header>
@@ -93,6 +92,8 @@
     <a href="{{ url_for('home') }}">Início</a>
     <a href="{{ url_for('blog') }}">Blog</a>
     <a href="{{ url_for('maddie') }}">Maddie</a>
+    <a href="{{ url_for('listar_livros') }}">Livros</a>
+    <a href="{{ url_for('comunidades') }}">Comunidades</a>
     {% if session.usuario_id %}
       <a href="{{ url_for('escrever') }}">✍️ Escrever</a>
     {% endif %}
@@ -103,7 +104,7 @@
   </main>
 
   <footer>
-    <p>&copy; 2025 · Madra Mada</p>
+    <p>&copy; 2025 &middot; Madra Mada</p>
   </footer>
 </body>
 </html>
