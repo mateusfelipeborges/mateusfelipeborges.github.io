@@ -25,8 +25,8 @@ app.config.update(
     MAIL_SERVER='smtp.gmail.com',
     MAIL_PORT=587,
     MAIL_USE_TLS=True,
-    MAIL_USERNAME=os.getenv('MAIL_USERNAME'),
-    MAIL_PASSWORD=os.getenv('MAIL_PASSWORD')
+    MAIL_USERNAME=os.getenv('mateusfelipeborges845@gmail.com'),
+    MAIL_PASSWORD=os.getenv('ssvqppatnrckeine')
 )
 mail = Mail(app)
 
@@ -183,7 +183,9 @@ def topico(comunidade_id, topico_id):
             emit('nova_mensagem', {'mensagem': mensagem}, room=topico_id)
     return render_template('topico.html', topico=topico)
 
- # Rota de Chat Online
+# ===============================
+# 💬 ROTA DE CHAT ONLINE
+# ===============================
 
 @app.route('/chat/<int:topico_id>', methods=['GET', 'POST'])
 def chat_online(topico_id):
