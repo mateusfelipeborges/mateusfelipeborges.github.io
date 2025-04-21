@@ -301,9 +301,9 @@ def cadastro():
         db.session.commit()
 
         # Enviar notificação por e-mail
-       msg = Message(
+msg = Message(
     subject='📝 Novo Cadastro no Madra Mada',
-    sender=os.getenv('MAIL_DEFAULT_SENDER'),  # 👈 ESSA LINHA AQUI
+    sender=os.getenv('MAIL_DEFAULT_SENDER'),  # Isso evita o AssertionError
     recipients=[os.getenv('MAIL_USERNAME')],
     body=f'''
 📬 Novo usuário se cadastrou!
@@ -316,6 +316,8 @@ Pronomes: {pronomes}
 Nome artístico: {nome_artistico}
 '''
 )
+mail.send(msg)
+
 
         mail.send(msg)
 
