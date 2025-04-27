@@ -33,12 +33,11 @@ app.config.update(
 mail = Mail(app)
 
 basedir = os.path.abspath(os.path.dirname(__file__))
-# Configuração do banco de dados PostgreSQL no Cloud SQL
-app.config['SQLALCHEMY_DATABASE_URI'] = (
-    f"postgresql://{os.getenv('DB_USER')}:{os.getenv('DB_PASS')}"
-    f"@{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('DB_NAME')}"
-)
+
+# Configuração do banco de dados SQLite
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'madra.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
 UPLOAD_FOLDER = os.path.join('static', 'uploads')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
