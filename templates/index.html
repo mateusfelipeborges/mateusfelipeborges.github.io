@@ -136,7 +136,7 @@
       font-size: 0.9em;
       opacity: 0.6;
     }
-    /* Estilos de Personagens */
+    /* Personagens */
     .personagens {
       margin-top: 2em;
       display: flex;
@@ -166,13 +166,18 @@
       margin-bottom: 0.5rem;
       box-shadow: 0 0 8px rgba(255,255,255,0.2);
     }
-    .npc-list .npc-card {
+    .npc-card {
       text-align: center;
+    }
+    .npc-card .tema {
+      font-size: 0.9em;
+      color: #c0b1e0;
+      margin-bottom: 0.5em;
     }
   </style>
 </head>
 <body>
-  <img src="static/img/sigilo.svg" alt="Símbolo" class="sigilo"/>
+  <img src="/static/img/sigilo.svg" alt="Símbolo" class="sigilo"/>
 
   <h1>Madra Mada ✨</h1>
   <p>Um espaço para reflexão, criação, orientação e expansão pessoal.</p>
@@ -188,39 +193,42 @@
     <a href="/blog">Blog</a>
   </nav>
 
-  <!-- Personagens destacados -->
+  <!-- Personagens antes da última transmissão -->
   <div class="personagens">
-    <!-- Maddie em cima -->
     <div class="personagem-maddie">
-      <img src="static/npc/maddie.png" alt="Maddie">
+      <img src="/static/npc/maddie.png" alt="Maddie">
       <h2>Maddie</h2>
       <a href="/maddie" style="color:#bb9af7; text-decoration:none; font-weight:bold;">Conversar</a>
     </div>
-    <!-- NPCs lado a lado -->
     <div class="npc-list">
       <div class="npc-card">
-        <img src="static/npc/Kaori Lumen.png" alt="Kaori Lumen">
+        <img src="/static/npc/Kaori Lumen.png" alt="Kaori Lumen">
         <h3>Kaori Lumen</h3>
+        <p class="tema">Música e Emoções</p>
         <a href="/chat/kaori" style="color:#bb9af7; text-decoration:none;">Conversar</a>
       </div>
       <div class="npc-card">
-        <img src="static/npc/Atlan Veylor.png" alt="Atlan Veylor">
+        <img src="/static/npc/Atlan Veylor.png" alt="Atlan Veylor">
         <h3>Atlan Veylor</h3>
+        <p class="tema">Propósito e Disciplina</p>
         <a href="/chat/atlan" style="color:#bb9af7; text-decoration:none;">Conversar</a>
       </div>
       <div class="npc-card">
-        <img src="static/npc/Lys Caldera.png" alt="Lys Caldera">
+        <img src="/static/npc/Lys Caldera.png" alt="Lys Caldera">
         <h3>Lys Caldera</h3>
+        <p class="tema">Ciência e Descoberta</p>
         <a href="/chat/lys" style="color:#bb9af7; text-decoration:none;">Conversar</a>
       </div>
       <div class="npc-card">
-        <img src="static/npc/Yuna Maris.png" alt="Yuna Maris">
+        <img src="/static/npc/Yuna Maris.png" alt="Yuna Maris">
         <h3>Yuna Maris</h3>
+        <p class="tema">Humor e Leveza</p>
         <a href="/chat/yuna" style="color:#bb9af7; text-decoration:none;">Conversar</a>
       </div>
       <div class="npc-card">
-        <img src="static/npc/Eryon Solace.png" alt="Eryon Solace">
+        <img src="/static/npc/Eryon Solace.png" alt="Eryon Solace">
         <h3>Eryon Solace</h3>
+        <p class="tema">Filosofia e Literatura</p>
         <a href="/chat/eryon" style="color:#bb9af7; text-decoration:none;">Conversar</a>
       </div>
     </div>
