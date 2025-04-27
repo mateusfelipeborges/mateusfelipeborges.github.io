@@ -25,15 +25,20 @@ app.config.update(
     MAIL_SERVER='smtp.gmail.com',
     MAIL_PORT=587,
     MAIL_USE_TLS=True,
-    MAIL_USERNAME=os.getenv('mateusfelipeborges845@gmail.com'),
-    MAIL_PASSWORD=os.getenv('ssvqppatnrckeine')
+    MAIL_USERNAME=os.getenv('MAIL_USERNAME'),
+    MAIL_PASSWORD=os.getenv('MAIL_PASSWORD'),
+    MAIL_DEFAULT_SENDER=os.getenv('MAIL_DEFAULT_SENDER', 'nao-responda@madramada.com')  # 📬 Aqui está o segredo!
 )
+
 mail = Mail(app)
 
 basedir = os.path.abspath(os.path.dirname(__file__))
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'madra.db')
+# Configuração do banco de dados PostgreSQL no Cloud SQL
+app.config['SQLALCHEMY_DATABASE_URI'] = (
+    f"postgresql://{os.getenv('DB_USER')}:{os.getenv('DB_PASS')}"
+    f"@{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('DB_NAME')}"
+)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
 UPLOAD_FOLDER = os.path.join('static', 'uploads')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -371,9 +376,12 @@ def relatorio_csv():
 
 # ===============================
 # 🚀 INÍCIO DO SERVIDOR
-# ===============================@app.route('/cadastro', methods=['GET', 'POST'])
+# ===============================
 
-if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 5000))
+# Para Gunicorn localizar corretamente a aplicação
+application = app
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 8080))
     print(f"Iniciando servidor Flask com SocketIO na porta {port}...")
-    socketio.run(app, debug=True, host='0.0.0.0', port=port, allow_unsafe_werkzeug=True)
+    socketio.run(app, debug=False, host='0.0.0.0', port=port)
