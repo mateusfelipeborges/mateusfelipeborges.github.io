@@ -6,35 +6,30 @@ import os
 import requests
 import csv
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_mail import Mail, Message
 from flask_socketio import SocketIO, emit
-
-# 🌿 Integrações internas
 from maddie_core import gerar_resposta_local, buscar_termo_em_livro
 
 # ===============================
-# ⚙️ CONFIGURAÇÕES INICIAIS
+# CONFIGURAÇÕES INICIAIS
 # ===============================
 
 load_dotenv()
 app = Flask(__name__, static_folder='static', template_folder='templates')
 app.secret_key = os.getenv('SECRET_KEY', 'madra_secreta')
 
-# Configuração do Flask-Mail
-from flask_mail import Mail, Message
 app.config.update(
     MAIL_SERVER='smtp.gmail.com',
     MAIL_PORT=587,
     MAIL_USE_TLS=True,
     MAIL_USERNAME=os.getenv('MAIL_USERNAME'),
     MAIL_PASSWORD=os.getenv('MAIL_PASSWORD'),
-    MAIL_DEFAULT_SENDER=os.getenv('MAIL_DEFAULT_SENDER', 'nao-responda@madramada.com')  # 📬 Aqui está o segredo!
+    MAIL_DEFAULT_SENDER=os.getenv('MAIL_DEFAULT_SENDER', 'nao-responda@madramada.com')
 )
 
 mail = Mail(app)
 
 basedir = os.path.abspath(os.path.dirname(__file__))
-
-# Configuração do banco de dados SQLite
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'madra.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -42,13 +37,11 @@ UPLOAD_FOLDER = os.path.join('static', 'uploads')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+socketio = SocketIO(app)
 db = SQLAlchemy(app)
 
-# Configuração do SocketIO
-socketio = SocketIO(app)
-
 # ===============================
-# 📦 MODELOS DO BANCO DE DADOS
+# MODELOS DO BANCO DE DADOS
 # ===============================
 
 class Visitante(db.Model):
@@ -91,7 +84,6 @@ class Usuario(db.Model):
     admin = db.Column(db.Boolean, default=False)
     data_registro = db.Column(db.DateTime, default=datetime.utcnow)
 
-# Modelos para o Fórum
 class Comunidade(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nome = db.Column(db.String(100))
@@ -124,7 +116,7 @@ class Participante(db.Model):
     comunidade = db.relationship('Comunidade', backref=db.backref('membros', lazy=True))
 
 # ===============================
-# 🛠 FUNÇÕES AUXILIARES
+# FUNÇÕES AUXILIARES
 # ===============================
 
 def registrar_visita(request, rota):
@@ -144,8 +136,9 @@ def registrar_visita(request, rota):
     db.session.add(nova_visita)
     db.session.commit()
 
+
 # ===============================
-# 🌐 ROTAS DO FLASK
+# ROTAS DO FLASK
 # ===============================
 
 @app.route('/criar_banco')
@@ -172,30 +165,24 @@ def comunidade(comunidade_id):
 
 @app.route('/comunidade/<int:comunidade_id>/topico/<int:topico_id>', methods=['GET', 'POST'])
 def topico(comunidade_id, topico_id):
-    registrar_visita(request, '/comunidade/<int:comunidade_id>/topico')
+    registrar_visita(request, f'/comunidade/{comunidade_id}/topico/{topico_id}')
     topico = Topico.query.get_or_404(topico_id)
     if request.method == 'POST':
         mensagem = request.form.get('mensagem')
         if mensagem:
             nova_mensagem = Mensagem(
-                usuario_id=session['usuario_id'],
+                usuario_id=session.get('usuario_id'),
                 topico_id=topico_id,
                 conteudo=mensagem
             )
             db.session.add(nova_mensagem)
             db.session.commit()
-            emit('nova_mensagem', {'mensagem': mensagem}, room=topico_id)
     return render_template('topico.html', topico=topico)
 
-# ===============================
-# 💬 ROTA DE CHAT ONLINE
-# ===============================
-
-@app.route('/chat/<int:topico_id>', methods=['GET', 'POST'])
-def chat_online(topico_id):
-    registrar_visita(request, '/chat')
-    topico = Topico.query.get_or_404(topico_id)
-    return render_template('chat.html', topico=topico)
+@app.route('/chat/<npc>')
+def chat_npc(npc):
+    registrar_visita(request, f'/chat/{npc}')
+    return render_template('chat.html', npc=npc)
 
 @app.route('/livros')
 def listar_livros():
@@ -277,7 +264,6 @@ def escrever():
 
     return render_template('escrever.html')
 
-
 @app.route('/cadastro', methods=['GET', 'POST'])
 def cadastro():
     if request.method == 'POST':
@@ -304,31 +290,26 @@ def cadastro():
         db.session.add(nova_conta)
         db.session.commit()
 
-        # Enviar notificação por e-mail
         msg = Message(
             subject='📝 Novo Cadastro no Madra Mada',
-            sender=os.getenv('MAIL_DEFAULT_SENDER'),  # Evita o AssertionError
+            sender=os.getenv('MAIL_DEFAULT_SENDER'),
             recipients=[os.getenv('MAIL_USERNAME')],
-            body=f'''
-📬 Novo usuário se cadastrou!
+            body=f'''📬 Novo usuário se cadastrou!
 
 Nome: {nome_completo}
 Email: {email}
 Idade: {idade}
 Apelido: {apelido}
 Pronomes: {pronomes}
-Nome artístico: {nome_artistico}
-'''
+Nome artístico: {nome_artistico}'''
         )
         mail.send(msg)
 
         return redirect(url_for('login'))
 
-    # GET: mostra o formulário
     return render_template('cadastro.html')
 
-
-@app.route('/login', methods=['GET', 'POST'])   
+@app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         email = request.form.get('email', '').strip()
@@ -339,7 +320,7 @@ def login():
             if usuario and check_password_hash(usuario.senha, senha):
                 session['usuario_id'] = usuario.id
                 session['usuario_nome'] = usuario.nome_completo
-                session['is_admin'] = usuario.admin  # Adiciona a informação de admin na sessão
+                session['is_admin'] = usuario.admin
                 return redirect(url_for('home'))
             return render_template('login.html', error="❌ Email ou senha inválidos.")
         except Exception as e:
@@ -347,7 +328,6 @@ def login():
             return render_template('login.html', error="⚠️ Ocorreu um erro durante o login. Tente novamente mais tarde.")
 
     return render_template('login.html')
-
 
 @app.route('/logout')
 def logout():
@@ -374,13 +354,14 @@ def relatorio_csv():
     return send_file(caminho_arquivo, as_attachment=True)
 
 # ===============================
-# 🚀 INÍCIO DO SERVIDOR
+# INICIO DO SERVIDOR
 # ===============================
 
-# Para Gunicorn localizar corretamente a aplicação
 application = app
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 8080))
+    # Defina a porta ou pegue a partir das variáveis de ambiente
+    port = int(os.environ.get("PORT", 5000))
     print(f"Iniciando servidor Flask com SocketIO na porta {port}...")
-    socketio.run(app, debug=False, host='0.0.0.0', port=port)
+    # Use socketio.run para iniciar o servidor com Flask e SocketIO
+    socketio.run(app, debug=True, host='0.0.0.0', port=port)

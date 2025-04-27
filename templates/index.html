@@ -1,202 +1,251 @@
 <!DOCTYPE html>
- <html lang="pt-BR">
- <head>
-   <meta charset="UTF-8" />
-   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-   <title>Madra Mada</title>
-   <style>
-     body {
-       background: radial-gradient(circle at top, #2e1e3f 0%, #1a1029 100%);
-       color: #f0e6ff;
-       font-family: 'Georgia', serif;
-       text-align: center;
-       margin: 0;
-       padding: 0;
-       display: flex;
-       flex-direction: column;
-       align-items: center;
-       min-height: 100vh;
-     }
- 
-     h1 {
-       font-size: 3.5em;
-       margin-top: 1em;
-       margin-bottom: 0.2em;
-       letter-spacing: 2px;
-       text-shadow: 0 0 8px #bb9af7;
-     }
- 
-     p {
-       font-size: 1.2em;
-       opacity: 0.85;
-       max-width: 700px;
-       line-height: 1.6;
-       padding: 0 1em;
-     }
- 
-     .sigilo {
-       width: 120px;
-       margin-top: 2em;
-       margin-bottom: 20px;
-       filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.2));
-     }
- 
-     .frase {
-       font-style: italic;
-       margin-top: 1em;
-       opacity: 0.7;
-     }
- 
-     nav {
-       margin-top: 2em;
-       display: flex;
-       flex-wrap: wrap;
-       justify-content: center;
-       gap: 15px;
-       gap: 12px;
-     }
- 
-     nav a {
-       text-decoration: none;
-       color: #f0e6ff;
-       font-weight: bold;
-       padding: 0.5em 1em;
-       border-radius: 4px;
-       padding: 0.6em 1.2em;
-       background-color: #3b2b50;
-       border-radius: 6px;
-       border: 1px solid #5e4b75;
-       transition: background 0.3s, color 0.3s;
-     }
- 
-     nav a:hover {
-       background: #bb9af7;
-       color: #2e1e3f;
-     }
- 
-     section.video, section.livros {
-       margin-top: 4em;
-       padding: 2em 1em;
-       width: 100%;
-       max-width: 900px;
-       text-align: center;
-       display: flex;
-       flex-direction: column;
-       align-items: center;
-     }
- 
-     .video h2, .livros h2 {
-       font-size: 2em;
-       margin-bottom: 0.5em;
-       color: #e0caff;
-     }
- 
-     .video p, .livros p {
-       opacity: 0.9;
-       font-size: 1.1em;
-       max-width: 700px;
-     }
- 
-     .video-container {
-       position: relative;
-       padding-bottom: 56.25%;
-       height: 0;
-       width: 100%;
-       max-width: 720px;
-       overflow: hidden;
-       margin-top: 2em;
-       box-shadow: 0 0 20px rgba(255,255,255,0.1);
-       border-radius: 10px;
-     }
- 
-     .video-container iframe {
-       position: absolute;
-       top: 0; left: 0;
-       width: 100%;
-       height: 100%;
-       border: none;
-       border-radius: 10px;
-     }
- 
-     .botao-compra {
-       display: inline-block;
-       margin: 3em auto 2em;
-       background: #bb9af7;
-       color: #2e1e3f;
-       padding: 0.8em 2em;
-       font-weight: bold;
-       border: none;
-       border-radius: 6px;
-       text-decoration: none;
-       font-size: 1em;
-       transition: background 0.3s;
-     }
- 
-     .botao-compra:hover {
-       background: #d4baff;
-     }
- 
-     .livros a {
-       margin-top: 1em;
-       display: inline-block;
-       color: #bb9af7;
-       font-weight: bold;
-       text-decoration: underline;
-       transition: color 0.3s;
-     }
- 
-     .livros a:hover {
-       color: #e0caff;
-     }
- 
-     footer {
-       margin-top: auto;
-       padding: 2em;
-       font-size: 0.9em;
-       opacity: 0.6;
-     }
-   </style>
- </head>
- <body>
-   <img src="static/img/sigilo.svg" alt="Símbolo" class="sigilo"/>
- 
-   <h1>Madra Mada ✨</h1>
-   <p>Um espaço para reflexão, criação, orientação e expansão pessoal.</p>
-   <p class="frase">Que o véu da intuição toque aqueles que buscam compreender mais do que apenas o visível.</p>
- 
-   <nav>
-     <a href="manifesto.html">Manifesto</a>
-     <a href="altares.html">Espaços</a>
-     <a href="textos.html">Palavras</a>
-     <a href="oracoes.html">Silêncios</a>
-     <a href="/maddie">Pergunte à Maddie</a>
-     <a href="/livros">Livros</a>
-     <a href="/blog">Blog</a>
-   </nav>
- 
-   <section class="video">
-     <h2>Última transmissão</h2>
-     <p>Um conteúdo recente para te inspirar e provocar novos olhares.</p>
-     <div class="video-container">
-       <iframe src="https://www.youtube.com/embed/BpwrwoHo7nU" 
-               frameborder="0" allowfullscreen>
-       </iframe>
-     </div>
-   </section>
- 
-   <section class="livros">
-     <h2>✨ Biblioteca Viva</h2>
-     <p>Explore os livros integrados à sabedoria da Maddie.</p>
-     <a href="/livros">Acessar livros disponíveis</a>
-   </section>
- 
-   <a href="https://a.co/d/36A5bPh" class="botao-compra" target="_blank" rel="noopener noreferrer">Adquirir o livro</a>
- 
-   {% include 'maddie-popup.html' %}
- 
-   <footer>
-     &copy; {{ current_year or "2025" }} Madra Mada · Criado com intuição e propósito
-   </footer>
- </body>
- </html>
- </html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Madra Mada</title>
+  <style>
+    /* (todo o seu CSS continua igual) */
+    body {
+      background: radial-gradient(circle at top, #2e1e3f 0%, #1a1029 100%);
+      color: #f0e6ff;
+      font-family: 'Georgia', serif;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+    h1 {
+      font-size: 3.5em;
+      margin-top: 1em;
+      margin-bottom: 0.2em;
+      letter-spacing: 2px;
+      text-shadow: 0 0 8px #bb9af7;
+    }
+    p {
+      font-size: 1.2em;
+      opacity: 0.85;
+      max-width: 700px;
+      line-height: 1.6;
+      padding: 0 1em;
+    }
+    .sigilo {
+      width: 120px;
+      margin-top: 2em;
+      margin-bottom: 20px;
+      filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.2));
+    }
+    .frase {
+      font-style: italic;
+      margin-top: 1em;
+      opacity: 0.7;
+    }
+    nav {
+      margin-top: 2em;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+    }
+    nav a {
+      text-decoration: none;
+      color: #f0e6ff;
+      font-weight: bold;
+      padding: 0.6em 1.2em;
+      background-color: #3b2b50;
+      border-radius: 6px;
+      border: 1px solid #5e4b75;
+      transition: background 0.3s, color 0.3s;
+    }
+    nav a:hover {
+      background: #bb9af7;
+      color: #2e1e3f;
+    }
+    section.video, section.livros {
+      margin-top: 4em;
+      padding: 2em 1em;
+      width: 100%;
+      max-width: 900px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .video h2, .livros h2 {
+      font-size: 2em;
+      margin-bottom: 0.5em;
+      color: #e0caff;
+    }
+    .video p, .livros p {
+      opacity: 0.9;
+      font-size: 1.1em;
+      max-width: 700px;
+    }
+    .video-container {
+      position: relative;
+      padding-bottom: 56.25%;
+      height: 0;
+      width: 100%;
+      max-width: 720px;
+      overflow: hidden;
+      margin-top: 2em;
+      box-shadow: 0 0 20px rgba(255,255,255,0.1);
+      border-radius: 10px;
+    }
+    .video-container iframe {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+      border-radius: 10px;
+    }
+    .botao-compra {
+      display: inline-block;
+      margin: 3em auto 2em;
+      background: #bb9af7;
+      color: #2e1e3f;
+      padding: 0.8em 2em;
+      font-weight: bold;
+      border: none;
+      border-radius: 6px;
+      text-decoration: none;
+      font-size: 1em;
+      transition: background 0.3s;
+    }
+    .botao-compra:hover {
+      background: #d4baff;
+    }
+    .livros a {
+      margin-top: 1em;
+      display: inline-block;
+      color: #bb9af7;
+      font-weight: bold;
+      text-decoration: underline;
+      transition: color 0.3s;
+    }
+    .livros a:hover {
+      color: #e0caff;
+    }
+    footer {
+      margin-top: auto;
+      padding: 2em;
+      font-size: 0.9em;
+      opacity: 0.6;
+    }
+    /* Estilos de Personagens */
+    .personagens {
+      margin-top: 2em;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .personagem-maddie img {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      object-fit: cover;
+      box-shadow: 0 0 10px rgba(255,255,255,0.3);
+      margin-bottom: 1rem;
+    }
+    .npc-list {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      flex-wrap: wrap;
+      margin-top: 1.5em;
+    }
+    .npc-list .npc-card img {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-bottom: 0.5rem;
+      box-shadow: 0 0 8px rgba(255,255,255,0.2);
+    }
+    .npc-list .npc-card {
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <img src="static/img/sigilo.svg" alt="Símbolo" class="sigilo"/>
+
+  <h1>Madra Mada ✨</h1>
+  <p>Um espaço para reflexão, criação, orientação e expansão pessoal.</p>
+  <p class="frase">Que o véu da intuição toque aqueles que buscam compreender mais do que apenas o visível.</p>
+
+  <nav>
+    <a href="manifesto.html">Manifesto</a>
+    <a href="/comunidades">Comunidade</a>
+    <a href="textos.html">Palavras</a>
+    <a href="oracoes.html">Silêncios</a>
+    <a href="/maddie">Pergunte à Maddie</a>
+    <a href="/livros">Livros</a>
+    <a href="/blog">Blog</a>
+  </nav>
+
+  <!-- Personagens destacados -->
+  <div class="personagens">
+    <!-- Maddie em cima -->
+    <div class="personagem-maddie">
+      <img src="static/npc/maddie.png" alt="Maddie">
+      <h2>Maddie</h2>
+      <a href="/maddie" style="color:#bb9af7; text-decoration:none; font-weight:bold;">Conversar</a>
+    </div>
+    <!-- NPCs lado a lado -->
+    <div class="npc-list">
+      <div class="npc-card">
+        <img src="static/npc/Kaori Lumen.png" alt="Kaori Lumen">
+        <h3>Kaori Lumen</h3>
+        <a href="/chat/kaori" style="color:#bb9af7; text-decoration:none;">Conversar</a>
+      </div>
+      <div class="npc-card">
+        <img src="static/npc/Atlan Veylor.png" alt="Atlan Veylor">
+        <h3>Atlan Veylor</h3>
+        <a href="/chat/atlan" style="color:#bb9af7; text-decoration:none;">Conversar</a>
+      </div>
+      <div class="npc-card">
+        <img src="static/npc/Lys Caldera.png" alt="Lys Caldera">
+        <h3>Lys Caldera</h3>
+        <a href="/chat/lys" style="color:#bb9af7; text-decoration:none;">Conversar</a>
+      </div>
+      <div class="npc-card">
+        <img src="static/npc/Yuna Maris.png" alt="Yuna Maris">
+        <h3>Yuna Maris</h3>
+        <a href="/chat/yuna" style="color:#bb9af7; text-decoration:none;">Conversar</a>
+      </div>
+      <div class="npc-card">
+        <img src="static/npc/Eryon Solace.png" alt="Eryon Solace">
+        <h3>Eryon Solace</h3>
+        <a href="/chat/eryon" style="color:#bb9af7; text-decoration:none;">Conversar</a>
+      </div>
+    </div>
+  </div>
+
+  <section class="video">
+    <h2>Última transmissão</h2>
+    <p>Um conteúdo recente para te inspirar e provocar novos olhares.</p>
+    <div class="video-container">
+      <iframe src="https://www.youtube.com/embed/BpwrwoHo7nU" frameborder="0" allowfullscreen></iframe>
+    </div>
+  </section>
+
+  <section class="livros">
+    <h2>✨ Biblioteca Viva</h2>
+    <p>Explore os livros integrados à sabedoria da Maddie.</p>
+    <a href="/livros">Acessar livros disponíveis</a>
+  </section>
+
+  <a href="https://a.co/d/36A5bPh" class="botao-compra" target="_blank" rel="noopener noreferrer">Adquirir o livro</a>
+
+  {% include 'maddie-popup.html' %}
+
+  <footer>
+    &copy; {{ current_year or "2025" }} Madra Mada · Criado com intuição e propósito
+  </footer>
+</body>
+</html>
