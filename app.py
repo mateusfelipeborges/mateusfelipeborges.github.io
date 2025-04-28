@@ -9,6 +9,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_mail import Mail, Message
 from flask_socketio import SocketIO, emit
 from maddie_core import gerar_resposta_local, buscar_termo_em_livro
+from personalidades import PERSONALIDADES
+
 
 # ===============================
 # CONFIGURAÇÕES INICIAIS
@@ -179,10 +181,53 @@ def topico(comunidade_id, topico_id):
             db.session.commit()
     return render_template('topico.html', topico=topico)
 
-@app.route('/chat/<npc>')
+@app.route('/chat/<npc>', methods=['GET', 'POST'])
 def chat_npc(npc):
     registrar_visita(request, f'/chat/{npc}')
-    return render_template('chat.html', npc=npc)
+    
+    perfil = PERSONALIDADES.get(npc)
+
+    if not perfil:
+        return "Personagem não encontrado.", 404
+
+    chat_key = f'historico_chat_{npc}'
+    if chat_key not in session:
+        session[chat_key] = []
+
+    if request.method == 'POST':
+        pergunta = request.form.get('pergunta', '').strip()
+        if pergunta:
+            prompt_personalizado = perfil['descricao'] + f"\nUsuário perguntou: {pergunta}"
+            resposta = gerar_resposta_local(prompt_personalizado)
+
+            session[chat_key].append({
+                'pergunta': pergunta,
+                'resposta': resposta
+            })
+            session.modified = True  # Importante para o Flask salvar a sessão
+
+    # 🔵 (IMPORTANTE: historico sempre fora do if request.method)
+    historico = session.get(chat_key, [])
+
+    nome_personagem = perfil['nome']
+
+    topicos = {
+        'lys': 'Ciência e Descoberta',
+        'atlan': 'Propósito e Disciplina',
+        'yuna': 'Humor e Leveza',
+        'eryon': 'Filosofia e Literatura',
+        'kaori': 'Música e Emoções',
+        'maddie': 'Reflexão e Intuição'
+    }
+    topico = topicos.get(npc.lower(), 'Sabedoria e Inspiração')
+
+    return render_template(
+        'chat.html',
+        npc=npc,
+        nome_personagem=nome_personagem,
+        historico=historico,
+        topico=topico  # Aqui o valor de 'topico' já está correto
+    )
 
 @app.route('/livros')
 def listar_livros():

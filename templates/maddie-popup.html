@@ -1,71 +1,172 @@
-<!-- Pop-up de conversa com Maddie -->
+<!-- Botão fixo para abrir o pop-up -->
+<button id="toggle-popup" class="popup-button">🔮 Pergunte à Maddie</button>
+
+<!-- Pop-up separado do botão -->
 <div id="maddie-popup" class="popup">
-    <button id="toggle-popup" class="popup-button">🔮 Pergunte à Maddie</button>
-    <div id="popup-content" class="popup-content">
-      <iframe src="/maddie" frameborder="0" class="popup-frame" title="Perguntas para Maddie"></iframe>
-    </div>
+  <div id="popup-content" class="popup-content">
+    <button id="close-popup" class="close-button">✖</button>
+    <iframe src="/maddie" frameborder="0" class="popup-frame" title="Perguntas para Maddie"></iframe>
   </div>
-  
-  <style>
-    .popup {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      z-index: 9999;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-    }
-  
-    .popup-button {
-      background-color: #925eff;
-      color: white;
-      border: none;
-      padding: 0.7rem 1.2rem;
-      border-radius: 10px;
-      cursor: pointer;
-      font-weight: bold;
-      transition: background-color 0.3s ease;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    }
-  
-    .popup-button:hover {
-      background-color: #7a4ae6;
-    }
-  
+</div>
+
+<style>
+  /* Botão fixo no canto */
+  .popup-button {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #925eff;
+    color: white;
+    border: none;
+    padding: 0.7rem 1.2rem;
+    border-radius: 10px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    z-index: 10000;
+  }
+
+  .popup-button:hover {
+    background-color: #7a4ae6;
+  }
+
+  /* Pop-up inicial */
+  .popup {
+    position: absolute;
+    display: none;
+    opacity: 0;
+    z-index: 9999;
+    pointer-events: none; /* o container não interfere */
+    transition: opacity 0.4s ease;
+  }
+
+  .popup-content {
+    position: relative;
+    width: 400px;
+    height: 500px;
+    border-radius: 12px;
+    border: 2px solid #925eff;
+    background-color: #1c1c2e;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+    overflow: hidden;
+    pointer-events: all; /* conteúdo pode ser clicado */
+  }
+
+  .popup-frame {
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
+
+  .close-button {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 1.5rem;
+    cursor: pointer;
+    z-index: 10001;
+  }
+
+  .close-button:hover {
+    color: #ff5e5e;
+  }
+
+  /* Responsividade para celular */
+  @media (max-width: 600px) {
     .popup-content {
-      display: none;
-      margin-top: 10px;
-      border: 2px solid #925eff;
-      border-radius: 12px;
-      overflow: hidden;
-      width: 400px;
-      height: 500px;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
-      background-color: #1c1c2e;
+      width: 90vw;
+      height: 70vh;
     }
-  
-    .popup-frame {
-      width: 100%;
-      height: 100%;
-      border: none;
+  }
+</style>
+
+<script>
+  const toggleButton = document.getElementById('toggle-popup');
+  const closeButton = document.getElementById('close-popup');
+  const popup = document.getElementById('maddie-popup');
+  const popupContent = document.getElementById('popup-content');
+
+  let isFollowingMouse = false;
+  let targetX = 0;
+  let targetY = 0;
+  let currentX = 0;
+  let currentY = 0;
+
+  const popupWidth = 400; // largura do pop-up
+  const popupHeight = 500; // altura do pop-up
+
+  // Ao clicar no botão
+  toggleButton.addEventListener('click', () => {
+    if (popup.style.display === 'block') {
+      popup.style.opacity = 0;
+      setTimeout(() => {
+        popup.style.display = 'none';
+      }, 400);
+      isFollowingMouse = false;
+    } else {
+      popup.style.display = 'block';
+      setTimeout(() => {
+        popup.style.opacity = 1;
+      }, 10);
+
+      // Centraliza o pop-up no centro da tela
+      const centerX = window.innerWidth / 2 - popupWidth / 2;
+      const centerY = window.innerHeight / 2 - popupHeight / 2;
+
+      currentX = centerX;
+      currentY = centerY;
+      targetX = centerX;
+      targetY = centerY;
+
+      popup.style.left = currentX + 'px';
+      popup.style.top = currentY + 'px';
+      popup.style.transform = 'none'; // remove qualquer transformação
     }
-  
-    @media (max-width: 600px) {
-      .popup-content {
-        width: 90vw;
-        height: 70vh;
-      }
+  });
+
+  // Ao clicar no botão de fechar
+  closeButton.addEventListener('click', () => {
+    popup.style.opacity = 0;
+    setTimeout(() => {
+      popup.style.display = 'none';
+    }, 400);
+    isFollowingMouse = false;
+  });
+
+  // Começa a seguir o mouse
+  popupContent.addEventListener('mouseenter', () => {
+    isFollowingMouse = true;
+  });
+
+  // Para de seguir
+  popupContent.addEventListener('mouseleave', () => {
+    isFollowingMouse = false;
+  });
+
+  // Atualiza destino conforme o mouse
+  document.addEventListener('mousemove', (e) => {
+    if (isFollowingMouse) {
+      targetX = e.clientX - popupWidth / 2;
+      targetY = e.clientY - popupHeight / 2;
     }
-  </style>
-  
-  <script>
-    const toggleButton = document.getElementById('toggle-popup');
-    const popupContent = document.getElementById('popup-content');
-  
-    toggleButton.addEventListener('click', () => {
-      const isOpen = popupContent.style.display === 'block';
-      popupContent.style.display = isOpen ? 'none' : 'block';
-    });
-  </script>
-  
+  });
+
+  // Animação contínua de movimento suave
+  function animate() {
+    requestAnimationFrame(animate);
+
+    if (popup.style.display === 'block') {
+      currentX += (targetX - currentX) * 0.1;
+      currentY += (targetY - currentY) * 0.1;
+
+      popup.style.left = currentX + 'px';
+      popup.style.top = currentY + 'px';
+    }
+  }
+
+  animate();
+</script>

@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Madra Mada</title>
   <style>
-    /* (todo o seu CSS continua igual) */
     body {
       background: radial-gradient(circle at top, #2e1e3f 0%, #1a1029 100%);
       color: #f0e6ff;
@@ -17,7 +16,15 @@
       flex-direction: column;
       align-items: center;
       min-height: 100vh;
+      opacity: 0;
+      animation: fadeIn 1.2s ease forwards;
     }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
     h1 {
       font-size: 3.5em;
       margin-top: 1em;
@@ -158,6 +165,14 @@
       flex-wrap: wrap;
       margin-top: 1.5em;
     }
+    .npc-list .npc-card {
+      text-align: center;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .npc-list .npc-card:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 15px rgba(187, 154, 247, 0.6);
+    }
     .npc-list .npc-card img {
       width: 100px;
       height: 100px;
@@ -166,9 +181,6 @@
       margin-bottom: 0.5rem;
       box-shadow: 0 0 8px rgba(255,255,255,0.2);
     }
-    .npc-card {
-      text-align: center;
-    }
     .npc-card .tema {
       font-size: 0.9em;
       color: #c0b1e0;
@@ -176,6 +188,7 @@
     }
   </style>
 </head>
+
 <body>
   <img src="/static/img/sigilo.svg" alt="Símbolo" class="sigilo"/>
 
@@ -193,40 +206,40 @@
     <a href="/blog">Blog</a>
   </nav>
 
-  <!-- Personagens antes da última transmissão -->
   <div class="personagens">
     <div class="personagem-maddie">
       <img src="/static/npc/maddie.png" alt="Maddie">
       <h2>Maddie</h2>
       <a href="/maddie" style="color:#bb9af7; text-decoration:none; font-weight:bold;">Conversar</a>
     </div>
+
     <div class="npc-list">
       <div class="npc-card">
-        <img src="/static/npc/Kaori Lumen.png" alt="Kaori Lumen">
+        <img src="/static/npc/kaori.png" alt="Kaori Lumen">
         <h3>Kaori Lumen</h3>
         <p class="tema">Música e Emoções</p>
         <a href="/chat/kaori" style="color:#bb9af7; text-decoration:none;">Conversar</a>
       </div>
       <div class="npc-card">
-        <img src="/static/npc/Atlan Veylor.png" alt="Atlan Veylor">
+        <img src="/static/npc/atlan.png" alt="Atlan Veylor">
         <h3>Atlan Veylor</h3>
         <p class="tema">Propósito e Disciplina</p>
         <a href="/chat/atlan" style="color:#bb9af7; text-decoration:none;">Conversar</a>
       </div>
       <div class="npc-card">
-        <img src="/static/npc/Lys Caldera.png" alt="Lys Caldera">
+        <img src="/static/npc/lys.png" alt="Lys Caldera">
         <h3>Lys Caldera</h3>
         <p class="tema">Ciência e Descoberta</p>
         <a href="/chat/lys" style="color:#bb9af7; text-decoration:none;">Conversar</a>
       </div>
       <div class="npc-card">
-        <img src="/static/npc/Yuna Maris.png" alt="Yuna Maris">
+        <img src="/static/npc/yuna.png" alt="Yuna Maris">
         <h3>Yuna Maris</h3>
         <p class="tema">Humor e Leveza</p>
         <a href="/chat/yuna" style="color:#bb9af7; text-decoration:none;">Conversar</a>
       </div>
       <div class="npc-card">
-        <img src="/static/npc/Eryon Solace.png" alt="Eryon Solace">
+        <img src="/static/npc/eryon.png" alt="Eryon Solace">
         <h3>Eryon Solace</h3>
         <p class="tema">Filosofia e Literatura</p>
         <a href="/chat/eryon" style="color:#bb9af7; text-decoration:none;">Conversar</a>

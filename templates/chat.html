@@ -1,43 +1,80 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container">
-  <h2>Chat: {{ topico.titulo }}</h2>
-  <div id="chat-messages">
-    {% for mensagem in topico.mensagens %}
-      <p><strong>{{ mensagem.usuario.nome_completo }}:</strong> {{ mensagem.conteudo }}</p>
-    {% endfor %}
+<div class="min-h-screen bg-gradient-to-br from-purple-900 to-indigo-800 text-white py-10 flex flex-col items-center px-4">
+
+  <!-- Nome do personagem + avatar -->
+  <div class="flex items-center space-x-4 mb-4 animate-fade-in">
+    <img src="{{ url_for('static', filename='npc/' + npc|lower + '.png') }}" 
+         alt="{{ nome_personagem }}" 
+         class="w-14 h-14 rounded-full object-cover shadow-md">
+    <h1 class="text-3xl font-bold">{{ nome_personagem }}</h1>
   </div>
 
-  <form id="chat-form">
-    <textarea id="message-input" placeholder="Digite sua mensagem..." required></textarea>
-    <button type="submit">Enviar</button>
+  <!-- Título do tópico do chat -->
+  <h2 class="text-xl font-semibold mb-6 text-indigo-200 animate-fade-in">
+    Chat: {{ topico }}  <!-- Usando a variável 'topico' diretamente -->
+  </h2>
+
+  <!-- Área do chat -->
+  <div id="chat-container" class="bg-indigo-700 bg-opacity-30 p-6 rounded-lg w-full max-w-2xl shadow-lg mb-6 overflow-y-auto h-[500px] flex flex-col space-y-4 scroll-smooth">
+
+    {% for mensagem in historico %}
+      {% if mensagem.pergunta %}
+        <!-- Mensagem do usuário -->
+        <div class="flex justify-end items-start gap-2">
+          <div class="max-w-xs bg-purple-600 bg-opacity-70 p-3 rounded-2xl text-sm leading-relaxed">
+            <p>{{ mensagem.pergunta }}</p>
+          </div>
+          <img src="{{ url_for('static', filename='npc/user.png') }}" 
+               alt="Você" 
+               class="w-10 h-10 rounded-full object-cover">
+        </div>
+      {% endif %}
+
+      {% if mensagem.resposta %}
+        <!-- Mensagem do personagem -->
+        <div class="flex justify-start items-start gap-2">
+          <img src="{{ url_for('static', filename='npc/' + npc|lower + '.png') }}" 
+               alt="{{ nome_personagem }}" 
+               class="w-10 h-10 rounded-full object-cover">
+          <div class="max-w-xs bg-indigo-800 bg-opacity-60 p-3 rounded-2xl text-sm leading-relaxed">
+            <p>{{ mensagem.resposta }}</p>
+          </div>
+        </div>
+      {% endif %}
+    {% endfor %}
+
+  </div>
+
+  <!-- Campo de digitação -->
+  <form id="chat-form" method="POST" class="flex w-full max-w-2xl space-x-2">
+    <input type="text" name="pergunta" placeholder="Digite sua mensagem..." 
+           class="flex-1 px-4 py-2 rounded-full bg-indigo-800 placeholder-indigo-300 text-white focus:outline-none focus:ring-2 focus:ring-purple-500" required />
+    <button type="submit" 
+            class="bg-purple-600 hover:bg-purple-500 px-6 py-2 rounded-full font-semibold transition">
+      Enviar
+    </button>
   </form>
+
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.min.js"></script>
 <script>
-  var socket = io.connect('http://' + document.domain + ':' + location.port);
-  var topico_id = {{ topico.id }};
-
-  // Recebe nova mensagem em tempo real
-  socket.on('nova_mensagem', function(data) {
-    var messagesContainer = document.getElementById('chat-messages');
-    var newMessage = document.createElement('p');
-    newMessage.innerHTML = `<strong>${data.usuario}</strong>: ${data.mensagem}`;
-    messagesContainer.appendChild(newMessage);
-  });
-
-  // Envia mensagem no chat
-  document.getElementById('chat-form').onsubmit = function(event) {
-    event.preventDefault();
-    var messageContent = document.getElementById('message-input').value;
-
-    socket.emit('enviar_mensagem', {
-      topico_id: topico_id,
-      mensagem: messageContent
-    });
-    document.getElementById('message-input').value = '';  // Limpa o campo de input
-  };
+  // Scroll automático para o fim do chat
+  const chatContainer = document.getElementById('chat-container');
+  if (chatContainer) {
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+  }
 </script>
+
+<style>
+/* Fade-in animation */
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in {
+  animation: fade-in 0.8s ease forwards;
+}
+</style>
 {% endblock %}
