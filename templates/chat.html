@@ -7,7 +7,7 @@
   <div class="flex items-center space-x-4 mb-4 animate-fade-in">
     <img src="{{ url_for('static', filename='npc/' + npc|lower + '.png') }}" 
          alt="{{ nome_personagem }}" 
-         class="w-14 h-14 rounded-full object-cover shadow-md">
+         class="w-16 h-16 rounded-full object-cover shadow-md">
     <h1 class="text-3xl font-bold">{{ nome_personagem }}</h1>
   </div>
 
@@ -28,7 +28,7 @@
           </div>
           <img src="{{ url_for('static', filename='npc/user.png') }}" 
                alt="Você" 
-               class="w-10 h-10 rounded-full object-cover">
+               class="w-16 h-16 rounded-full object-cover">
         </div>
       {% endif %}
 
@@ -37,7 +37,7 @@
         <div class="flex justify-start items-start gap-2">
           <img src="{{ url_for('static', filename='npc/' + npc|lower + '.png') }}" 
                alt="{{ nome_personagem }}" 
-               class="w-10 h-10 rounded-full object-cover">
+               class="w-16 h-16 rounded-full object-cover">
           <div class="max-w-xs bg-indigo-800 bg-opacity-60 p-3 rounded-2xl text-sm leading-relaxed">
             <p>{{ mensagem.resposta }}</p>
           </div>
